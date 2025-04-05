@@ -38,13 +38,13 @@ export class Canvas {
 	}
 
 	drawCircle(props: CircleProps) {
+		const {ctx} = this;
 		const {
 			position,
 			radius,
 			color = '#000',
 			filled = true,
 		} = props;
-		const {ctx} = this;
 
 		ctx.beginPath();
 		ctx.arc(position.x, position.y, radius, 0.0, 2.0 * Math.PI);
