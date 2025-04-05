@@ -2,28 +2,25 @@ import {Vec2} from 'p2d-vec2';
 import {Canvas} from 'p2d-canvas';
 import {Camera} from 'p2d-camera';
 
+const simMinWidth = 20.0;
+const gravity = new Vec2(0, -9.8);
+
 const canvas = new Canvas({
 	parent: document.getElementById('canvas-container') as HTMLElement,
 	width: 720,
 	height: 500
 });
 
-const simMinWidth = 20.0;
-//const simWidth = canvas.width / cScale;
-//const simHeight = canvas.height / cScale;
+const camera = new Camera({
+	position: Vec2.zero(),
+	scale: canvas.height / simMinWidth,
+});
 
 const ball = {
 	radius: 0.2,
 	position: new Vec2(0.2, 0.2),
 	velocity: new Vec2(10.0, 15.0),
 };
-
-const camera = new Camera({
-	position: Vec2.zero(),
-	scale: canvas.height / simMinWidth,
-});
-
-const gravity = new Vec2(0, -9.8);
 
 function translate(v: Vec2): Vec2 {
 	/**
