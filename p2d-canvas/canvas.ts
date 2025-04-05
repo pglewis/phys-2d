@@ -4,6 +4,13 @@ export type CanvasProps = {
 	height?: number
 };
 
+export type CircleProps = {
+	position: {x: number, y: number}
+	radius: number
+	filled?: boolean
+	color?: string | CanvasGradient | CanvasPattern
+};
+
 export class Canvas {
 	canvas: HTMLCanvasElement;
 	ctx: CanvasRenderingContext2D;
@@ -30,16 +37,24 @@ export class Canvas {
 		this.ctx.clearRect(0, 0, this.width, this.height);
 	}
 
-	drawCircle(pos: {x: number, y: number}, radius: number, filled: boolean) {
+	drawCircle(props: CircleProps) {
+		const {
+			position,
+			radius,
+			color = '#000',
+			filled = true,
+		} = props;
 		const {ctx} = this;
 
 		ctx.beginPath();
-		ctx.arc(pos.x, pos.y, radius, 0.0, 2.0 * Math.PI);
+		ctx.arc(position.x, position.y, radius, 0.0, 2.0 * Math.PI);
 		ctx.closePath();
 
 		if (filled) {
+			ctx.fillStyle = color;
 			ctx.fill();
 		} else {
+			ctx.strokeStyle = color;
 			ctx.stroke();
 		}
 	}

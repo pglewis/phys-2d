@@ -1,4 +1,8 @@
 export class Canvas {
+    canvas;
+    ctx;
+    width;
+    height;
     constructor(props = {}) {
         const { parent = document.body, width = 640, height = 480, } = props;
         this.canvas = document.createElement('canvas');
@@ -11,15 +15,18 @@ export class Canvas {
     clear() {
         this.ctx.clearRect(0, 0, this.width, this.height);
     }
-    drawCircle(pos, radius, filled) {
+    drawCircle(props) {
+        const { position, radius, color = '#000', filled = true, } = props;
         const { ctx } = this;
         ctx.beginPath();
-        ctx.arc(pos.x, pos.y, radius, 0.0, 2.0 * Math.PI);
+        ctx.arc(position.x, position.y, radius, 0.0, 2.0 * Math.PI);
         ctx.closePath();
         if (filled) {
+            ctx.fillStyle = color;
             ctx.fill();
         }
         else {
+            ctx.strokeStyle = color;
             ctx.stroke();
         }
     }

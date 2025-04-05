@@ -26,13 +26,19 @@ function translate(v: Vec2): Vec2 {
 	/**
 	 * Scale and move the origin to the bottom left
 	 */
-	return Vec2.add(v, camera.position).scaleXY(camera.scale, -camera.scale).addY(canvas.height);
+	return Vec2.add(v, camera.position)
+		.scaleXY(camera.scale, -camera.scale)
+		.addY(canvas.height);
 }
 
 function draw() {
 	canvas.clear();
-	canvas.ctx.fillStyle = '#FF0000';
-	canvas.drawCircle(translate(ball.position), camera.scale * ball.radius, true);
+
+	canvas.drawCircle({
+		position: translate(ball.position),
+		radius: ball.radius * camera.scale,
+		color: '#f00',
+	});
 }
 
 function simulate(tDelta: number) {
