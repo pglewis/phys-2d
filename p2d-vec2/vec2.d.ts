@@ -15,9 +15,8 @@ export declare class Vec2 {
     static scaleXY(v: Vec2, xScalar: number, yScalar: number): Vec2;
     /**
      * @param v
-     * @returns Modifies the existing vector
     */
-    add(v: Vec2): Vec2;
+    add(v: Vec2): void;
     /**
      * @param scalar
      * @returns Modifies the existing vector
@@ -32,6 +31,7 @@ export declare class Vec2 {
     multiply(v: Vec2): Vec2;
     divide(v: Vec2): Vec2;
     scale(scalar: number): Vec2;
+    scaleXY(xScalar: number, yScalar: number): Vec2;
     dot(v: Vec2): number;
     normalize(): Vec2;
     get magnitude(): number;

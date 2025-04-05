@@ -1,4 +1,6 @@
 export class Vec2 {
+    x;
+    y;
     constructor(x = 0, y = 0) {
         this.x = x;
         this.y = y;
@@ -30,7 +32,7 @@ export class Vec2 {
     static sum(...vectors) {
         let sum = Vec2.zero();
         for (const thisVector of vectors) {
-            sum = sum.add(thisVector);
+            sum = Vec2.add(sum, thisVector);
         }
         return sum;
     }
@@ -42,10 +44,10 @@ export class Vec2 {
     }
     /**
      * @param v
-     * @returns Modifies the existing vector
     */
     add(v) {
-        return Vec2.add(this, v);
+        this.x = this.x + v.x;
+        this.y = this.y + v.y;
     }
     /**
      * @param scalar
@@ -71,7 +73,10 @@ export class Vec2 {
         return new Vec2(this.x / v.x, this.y / v.y);
     }
     scale(scalar) {
-        return new Vec2(this.x * scalar, this.y * scalar);
+        return Vec2.scale(this, scalar);
+    }
+    scaleXY(xScalar, yScalar) {
+        return Vec2.scaleXY(this, xScalar, yScalar);
     }
     dot(v) {
         return this.x * v.x + this.y * v.y;
