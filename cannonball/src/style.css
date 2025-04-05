@@ -1,0 +1,14 @@
+body {
+	background-color: #222;
+}
+
+#app {
+	width: 720px;
+	margin: 0 auto;
+}
+
+#canvas {
+	background: #eee;
+	display: block;
+	/*border: 2px solid skyblue;*/
+}
