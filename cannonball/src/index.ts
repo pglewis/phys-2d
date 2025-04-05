@@ -26,9 +26,9 @@ function translate(v: Vec2): Vec2 {
 	/**
 	 * Scale and move the origin to the bottom left
 	 */
-	return Vec2.add(v, camera.position)
-		.scaleXY(camera.scale, -camera.scale)
-		.addY(canvas.height);
+	return Vec2.add(v, camera.position) // These are in world space
+		.scaleXY(camera.scale, -camera.scale) // Scaled with Y flipped
+		.addY(canvas.height); // Y is flipped, we need to offset by the height
 }
 
 function draw() {
