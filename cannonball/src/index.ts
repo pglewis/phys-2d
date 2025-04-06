@@ -42,8 +42,8 @@ function draw() {
 }
 
 function simulate(tDelta: number) {
-	ball.velocity.add(Vec2.scale(gravity, tDelta));
-	ball.position.add(Vec2.scale(ball.velocity, tDelta));
+	ball.velocity.add(gravity, tDelta);
+	ball.position.add(ball.velocity, tDelta);
 
 	if (ball.position.x < 0.0) {
 		ball.position.x = 0.0;
