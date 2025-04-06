@@ -13,20 +13,11 @@ export declare class Vec2 {
     static sum(...vectors: Vec2[]): Vec2;
     static scale(v: Vec2, scalar: number): Vec2;
     static scaleXY(v: Vec2, xScalar: number, yScalar: number): Vec2;
-    /**
-     * @param v
-     */
+    set(v: Vec2): void;
+    clone(): Vec2;
     add(v: Vec2): void;
-    /**
-     * @param scalar
-     * @returns Modifies the existing vector
-     */
-    addX(scalar: number): Vec2;
-    /**
-     * @param scalar
-     * @returns Modifies the existing vector
-     */
-    addY(scalar: number): Vec2;
+    addX(x: number): void;
+    addY(y: number): void;
     subtract(v: Vec2): Vec2;
     multiply(v: Vec2): Vec2;
     divide(v: Vec2): Vec2;

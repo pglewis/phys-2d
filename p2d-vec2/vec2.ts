@@ -60,28 +60,26 @@ export class Vec2 {
 		return new Vec2(v.x * xScalar, v.y * yScalar);
 	}
 
-	/**
-	 * @param v
-	 */
+	set(v: Vec2) {
+		this.x = v.x;
+		this.y = v.y;
+	}
+
+	clone() {
+		return new Vec2(this.x, this.y);
+	}
+
 	add(v: Vec2): void {
-		this.x = this.x + v.x;
-		this.y = this.y + v.y;
+		this.x += v.x;
+		this.y += v.y;
 	}
 
-	/**
-	 * @param scalar
-	 * @returns Modifies the existing vector
-	 */
-	addX(scalar: number): Vec2 {
-		return Vec2.addX(this, scalar);
+	addX(x: number): void {
+		this.x += x;
 	}
 
-	/**
-	 * @param scalar
-	 * @returns Modifies the existing vector
-	 */
-	addY(scalar: number): Vec2 {
-		return Vec2.addY(this, scalar);
+	addY(y: number): void {
+		this.y += y;
 	}
 
 	subtract(v: Vec2): Vec2 {

@@ -42,26 +42,22 @@ export class Vec2 {
     static scaleXY(v, xScalar, yScalar) {
         return new Vec2(v.x * xScalar, v.y * yScalar);
     }
-    /**
-     * @param v
-     */
+    set(v) {
+        this.x = v.x;
+        this.y = v.y;
+    }
+    clone() {
+        return new Vec2(this.x, this.y);
+    }
     add(v) {
-        this.x = this.x + v.x;
-        this.y = this.y + v.y;
+        this.x += v.x;
+        this.y += v.y;
     }
-    /**
-     * @param scalar
-     * @returns Modifies the existing vector
-     */
-    addX(scalar) {
-        return Vec2.addX(this, scalar);
+    addX(x) {
+        this.x += x;
     }
-    /**
-     * @param scalar
-     * @returns Modifies the existing vector
-     */
-    addY(scalar) {
-        return Vec2.addY(this, scalar);
+    addY(y) {
+        this.y += y;
     }
     subtract(v) {
         return new Vec2(this.x - v.x, this.y - v.y);
