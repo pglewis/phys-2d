@@ -1,10 +1,38 @@
 body {
 	background-color: #222;
+	color: white;
+	font-family: sans-serif;
 }
 
 #app {
 	width: 720px;
 	margin: 0 auto;
+}
+
+.button {
+	background-color: #606060;
+	border: none;
+	color: white;
+	padding: 10px 32px;
+	font-size: 16px;
+	margin: 4px 2px;
+	cursor: pointer;
+}
+
+.slider {
+	-webkit-appearance: none;
+	width: 80px;
+	height: 6px;
+	border-radius: 5px;
+	background: #d3d3d3;
+	outline: none;
+	opacity: 0.7;
+	-webkit-transition: 0.2s;
+	transition: opacity 0.2s;
+}
+
+#canvas-container {
+	margin-top: 20px;
 }
 
 #canvas {

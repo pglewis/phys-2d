@@ -3,6 +3,14 @@ import {Canvas} from 'p2d-canvas';
 import {Camera} from 'p2d-camera';
 import {Ball} from './ball';
 
+const reset = document.getElementById('reset-button') as HTMLButtonElement;
+reset.addEventListener('click', () => setupScene());
+
+const slider = document.getElementById('restitution-slider') as HTMLInputElement;
+slider.addEventListener('input', () => {
+	physicsScene.restitution = Number(slider.value) / 10;
+});
+
 const canvas = new Canvas({
 	parent: document.getElementById('canvas-container') as HTMLElement,
 	width: 720,
