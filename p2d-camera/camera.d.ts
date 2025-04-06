@@ -8,5 +8,6 @@ export declare class Camera {
     position: Vec2;
     scale: number;
     constructor(initialState: CameraState);
+    transform(v: Vec2): Vec2;
     reset(): void;
 }
