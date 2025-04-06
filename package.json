@@ -2,12 +2,10 @@
   "name": "phys-2d-monorepo",
   "private": true,
   "workspaces": [
-    "p2d-vec2",
-    "p2d-canvas",
-    "p2d-camera",
-    "cannonball",
-    "collision",
-    "constraint"
+      "p2d-vec2",
+      "p2d-canvas",
+      "p2d-camera",
+      "demo/*"
   ],
   "scripts": {
     "build-vec2": "npm run build -w p2d-vec2",
