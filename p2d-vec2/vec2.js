@@ -11,11 +11,11 @@ export class Vec2 {
     static one() {
         return new Vec2(1, 1);
     }
-    static fromDegrees(degrees, scalar = 1) {
-        return Vec2.fromRadians(degrees * Math.PI / 180, scalar);
+    static fromDegrees(deg, scale = 1) {
+        return Vec2.fromRadians(deg * Math.PI / 180, scale);
     }
-    static fromRadians(radians, scalar = 1) {
-        return Vec2.scale(new Vec2(Math.cos(radians), Math.sin(radians)), scalar);
+    static fromRadians(rad, scale = 1) {
+        return Vec2.scale(new Vec2(Math.cos(rad), Math.sin(rad)), scale);
     }
     static fromArray([x, y]) {
         return new Vec2(x, y);
@@ -29,6 +29,9 @@ export class Vec2 {
     static addY(v, y) {
         return new Vec2(v.x, v.y + y);
     }
+    static subtract(v1, v2) {
+        return new Vec2(v1.x - v2.x, v1.y - v2.y);
+    }
     static sum(...vectors) {
         let sum = Vec2.zero();
         for (const thisVector of vectors) {
@@ -36,18 +39,21 @@ export class Vec2 {
         }
         return sum;
     }
-    static scale(v, scalar) {
-        return new Vec2(v.x * scalar, v.y * scalar);
+    static scale(v, scale) {
+        return new Vec2(v.x * scale, v.y * scale);
     }
-    static scaleXY(v, xScalar, yScalar) {
-        return new Vec2(v.x * xScalar, v.y * yScalar);
+    static scaleXY(v, xScale, yScale) {
+        return new Vec2(v.x * xScale, v.y * yScale);
+    }
+    static normalize(v) {
+        return new Vec2(v.x / v.magnitude, v.y / v.magnitude);
+    }
+    clone() {
+        return new Vec2(this.x, this.y);
     }
     set(v) {
         this.x = v.x;
         this.y = v.y;
-    }
-    clone() {
-        return new Vec2(this.x, this.y);
     }
     add(v) {
         this.x += v.x;
@@ -60,25 +66,26 @@ export class Vec2 {
         this.y += y;
     }
     subtract(v) {
-        return new Vec2(this.x - v.x, this.y - v.y);
+        this.x -= v.x;
+        this.y -= v.y;
     }
-    multiply(v) {
-        return new Vec2(this.x * v.x, this.y * v.y);
+    scale(scale) {
+        this.x *= scale;
+        this.y *= scale;
     }
-    divide(v) {
-        return new Vec2(this.x / v.x, this.y / v.y);
+    scaleXY(xScale, yScale) {
+        this.x *= xScale;
+        this.y *= yScale;
     }
-    scale(scalar) {
-        return Vec2.scale(this, scalar);
-    }
-    scaleXY(xScalar, yScalar) {
-        return Vec2.scaleXY(this, xScalar, yScalar);
+    normalize() {
+        this.x /= this.magnitude;
+        this.y /= this.magnitude;
     }
     dot(v) {
         return this.x * v.x + this.y * v.y;
     }
-    normalize() {
-        return new Vec2(this.x / this.magnitude, this.y / this.magnitude);
+    get length() {
+        return this.magnitude;
     }
     get magnitude() {
         return Math.sqrt(this.x ** 2 + this.y ** 2);
