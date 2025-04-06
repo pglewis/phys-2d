@@ -15,7 +15,7 @@ export declare class Vec2 {
     static scaleXY(v: Vec2, xScalar: number, yScalar: number): Vec2;
     /**
      * @param v
-    */
+     */
     add(v: Vec2): void;
     /**
      * @param scalar

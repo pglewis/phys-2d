@@ -44,7 +44,7 @@ export class Vec2 {
     }
     /**
      * @param v
-    */
+     */
     add(v) {
         this.x = this.x + v.x;
         this.y = this.y + v.y;

@@ -16,8 +16,8 @@ export class Canvas {
         this.ctx.clearRect(0, 0, this.width, this.height);
     }
     drawCircle(props) {
-        const { position, radius, color = '#000', filled = true, } = props;
         const { ctx } = this;
+        const { position, radius, color = '#000', filled = true, } = props;
         ctx.beginPath();
         ctx.arc(position.x, position.y, radius, 0.0, 2.0 * Math.PI);
         ctx.closePath();
