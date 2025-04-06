@@ -27,8 +27,8 @@ export class Vec2 {
 		return new Vec2(x, y);
 	}
 
-	static add(v1: Vec2, v2: Vec2) {
-		return new Vec2(v1.x + v2.x, v1.y + v2.y);
+	static add(v1: Vec2, v2: Vec2, scale: number = 1) {
+		return new Vec2((v1.x + v2.x) * scale, (v1.y + v2.y) * scale);
 	}
 
 	static addX(v: Vec2, x: number): Vec2 {
@@ -76,9 +76,9 @@ export class Vec2 {
 		return this;
 	}
 
-	add(v: Vec2): Vec2 {
-		this.x += v.x;
-		this.y += v.y;
+	add(v: Vec2, scale: number = 1): Vec2 {
+		this.x += v.x * scale;
+		this.y += v.y * scale;
 
 		return this;
 	}

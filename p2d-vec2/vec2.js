@@ -20,8 +20,8 @@ export class Vec2 {
     static fromArray([x, y]) {
         return new Vec2(x, y);
     }
-    static add(v1, v2) {
-        return new Vec2(v1.x + v2.x, v1.y + v2.y);
+    static add(v1, v2, scale = 1) {
+        return new Vec2((v1.x + v2.x) * scale, (v1.y + v2.y) * scale);
     }
     static addX(v, x) {
         return new Vec2(v.x + x, v.y);
@@ -56,9 +56,9 @@ export class Vec2 {
         this.y = v.y;
         return this;
     }
-    add(v) {
-        this.x += v.x;
-        this.y += v.y;
+    add(v, scale = 1) {
+        this.x += v.x * scale;
+        this.y += v.y * scale;
         return this;
     }
     addX(x) {

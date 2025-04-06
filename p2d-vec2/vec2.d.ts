@@ -7,7 +7,7 @@ export declare class Vec2 {
     static fromDegrees(deg: number, scale?: number): Vec2;
     static fromRadians(rad: number, scale?: number): Vec2;
     static fromArray([x, y]: [number, number]): Vec2;
-    static add(v1: Vec2, v2: Vec2): Vec2;
+    static add(v1: Vec2, v2: Vec2, scale?: number): Vec2;
     static addX(v: Vec2, x: number): Vec2;
     static addY(v: Vec2, y: number): Vec2;
     static subtract(v1: Vec2, v2: Vec2): Vec2;
@@ -17,7 +17,7 @@ export declare class Vec2 {
     static normalize(v: Vec2): Vec2;
     clone(): Vec2;
     set(v: Vec2): Vec2;
-    add(v: Vec2): Vec2;
+    add(v: Vec2, scale?: number): Vec2;
     addX(x: number): Vec2;
     addY(y: number): Vec2;
     subtract(v: Vec2): Vec2;
