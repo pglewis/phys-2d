@@ -46,7 +46,11 @@ export class Vec2 {
         return new Vec2(v.x * xScale, v.y * yScale);
     }
     static normalize(v) {
-        return new Vec2(v.x / v.magnitude, v.y / v.magnitude);
+        const length = v.length;
+        if (length === 0) {
+            return Vec2.zero();
+        }
+        return new Vec2(v.x / length, v.y / length);
     }
     clone() {
         return new Vec2(this.x, this.y);
@@ -85,8 +89,13 @@ export class Vec2 {
         return this;
     }
     normalize() {
-        this.x /= this.magnitude;
-        this.y /= this.magnitude;
+        const length = this.length;
+        if (length === 0) {
+            this.set(Vec2.zero());
+            return this;
+        }
+        this.x /= length;
+        this.y /= length;
         return this;
     }
     dot(v) {
