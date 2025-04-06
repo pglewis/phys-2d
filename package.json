@@ -6,14 +6,14 @@
     "p2d-canvas",
     "p2d-camera",
     "cannonball",
-    "billiard"
+    "collision"
   ],
   "scripts": {
     "build-vec2": "npm run build -w p2d-vec2",
     "build-canvas": "npm run build -w p2d-canvas",
     "build-camera": "npm run build -w p2d-camera",
     "build-lib": "npm run build-vec2 && npm run build-canvas && npm run build-camera",
-    "billiard": "npm run dev -w billiard",
+    "collision": "npm run dev -w collision",
     "cannonball": "npm run dev -w cannonball"
   }
 }
