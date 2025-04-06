@@ -4,10 +4,11 @@
     "version": "0.0.0",
     "private": "true",
     "type": "module",
+    "main": "./dist/vec2.js",
     "exports": {
         ".": {
-            "types": "./vec2.d.ts",
-            "import": "./vec2.js"
+            "types": "./dist/vec2.d.ts",
+            "import": "./dist/vec2.js"
         }
     },
     "devDependencies": {

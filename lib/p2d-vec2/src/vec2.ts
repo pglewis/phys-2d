@@ -71,6 +71,10 @@ export class Vec2 {
 		return new Vec2(v.x / length, v.y / length);
 	}
 
+	static perp(v: Vec2): Vec2 {
+		return new Vec2(-v.y, v.x);
+	}
+
 	clone() {
 		return new Vec2(this.x, this.y);
 	}
@@ -134,6 +138,10 @@ export class Vec2 {
 		this.y /= length;
 
 		return this;
+	}
+
+	perp(): Vec2 {
+		return new Vec2(-this.y, this.x);
 	}
 
 	dot(v: Vec2): number {
