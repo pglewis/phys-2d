@@ -22,20 +22,18 @@ const ball = {
 	velocity: new Vec2(10.0, 15.0),
 };
 
-function translate(v: Vec2): Vec2 {
-	/**
-	 * Scale and move the origin to the bottom left
-	 */
-	return Vec2.add(v, camera.position) // These are in world space
-		.scaleXY(camera.scale, -camera.scale) // Scaled with Y flipped
-		.addY(canvas.height); // Y is flipped, we need to offset by the height
+function worldToCanvas(v: Vec2): Vec2 {
+	const cameraSpace = camera.transform(v);
+
+	// Canvas space has a top left origin
+	return new Vec2(cameraSpace.x, canvas.height - cameraSpace.y);
 }
 
 function draw() {
 	canvas.clear();
 
 	canvas.drawCircle({
-		position: translate(ball.position),
+		position: worldToCanvas(ball.position),
 		radius: ball.radius * camera.scale,
 		color: '#f00',
 	});
