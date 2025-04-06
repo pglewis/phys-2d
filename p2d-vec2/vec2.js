@@ -54,32 +54,40 @@ export class Vec2 {
     set(v) {
         this.x = v.x;
         this.y = v.y;
+        return this;
     }
     add(v) {
         this.x += v.x;
         this.y += v.y;
+        return this;
     }
     addX(x) {
         this.x += x;
+        return this;
     }
     addY(y) {
         this.y += y;
+        return this;
     }
     subtract(v) {
         this.x -= v.x;
         this.y -= v.y;
+        return this;
     }
     scale(scale) {
         this.x *= scale;
         this.y *= scale;
+        return this;
     }
     scaleXY(xScale, yScale) {
         this.x *= xScale;
         this.y *= yScale;
+        return this;
     }
     normalize() {
         this.x /= this.magnitude;
         this.y /= this.magnitude;
+        return this;
     }
     dot(v) {
         return this.x * v.x + this.y * v.y;

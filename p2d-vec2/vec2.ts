@@ -69,42 +69,58 @@ export class Vec2 {
 		return new Vec2(this.x, this.y);
 	}
 
-	set(v: Vec2) {
+	set(v: Vec2): Vec2 {
 		this.x = v.x;
 		this.y = v.y;
+
+		return this;
 	}
 
-	add(v: Vec2): void {
+	add(v: Vec2): Vec2 {
 		this.x += v.x;
 		this.y += v.y;
+
+		return this;
 	}
 
-	addX(x: number): void {
+	addX(x: number): Vec2 {
 		this.x += x;
+
+		return this;
 	}
 
-	addY(y: number): void {
+	addY(y: number): Vec2 {
 		this.y += y;
+
+		return this;
 	}
 
-	subtract(v: Vec2): void {
+	subtract(v: Vec2): Vec2 {
 		this.x -= v.x;
 		this.y -= v.y;
+
+		return this;
 	}
 
-	scale(scale: number): void {
+	scale(scale: number): Vec2 {
 		this.x *= scale;
 		this.y *= scale;
+
+		return this;
 	}
 
-	scaleXY(xScale: number, yScale: number): void {
+	scaleXY(xScale: number, yScale: number): Vec2 {
 		this.x *= xScale;
 		this.y *= yScale;
+
+		return this;
 	}
 
-	normalize(): void {
+	normalize(): Vec2 {
 		this.x /= this.magnitude;
 		this.y /= this.magnitude;
+
+		return this;
 	}
 
 	dot(v: Vec2): number {
