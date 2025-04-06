@@ -2,9 +2,7 @@
   "name": "phys-2d-monorepo",
   "private": true,
   "workspaces": [
-      "p2d-vec2",
-      "p2d-canvas",
-      "p2d-camera",
+      "lib/*",
       "demo/*"
   ],
   "scripts": {
