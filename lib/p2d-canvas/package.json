@@ -1,13 +1,14 @@
 {
     "name": "p2d-canvas",
     "description": "Canvas",
-    "version": "0.0.0",
     "private": "true",
+    "version": "0.0.0",
     "type": "module",
+    "main": "./dist/canvas.js",
     "exports": {
         ".": {
-            "types": "./canvas.d.ts",
-            "import": "./canvas.js"
+            "types": "./dist/canvas.d.ts",
+            "import": "./dist/canvas.js"
         }
     },
     "devDependencies": {

@@ -4,11 +4,11 @@
     "private": "true",
     "version": "0.0.0",
     "type": "module",
-    "main": "camera.ts",
+    "main": "./dist/camera.js",
     "exports": {
         ".": {
-            "types": "./camera.d.ts",
-            "import": "./camera.js"
+            "types": "./dist/camera.d.ts",
+            "import": "./dist/camera.js"
         }
     },
     "dependencies": {
