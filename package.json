@@ -12,6 +12,7 @@
     "build-lib": "npm run build-vec2 && npm run build-canvas && npm run build-camera",
     "cannonball": "npm run dev -w cannonball",
     "collision": "npm run dev -w collision",
-    "constraint": "npm run dev -w constraint"
+    "constraint": "npm run dev -w constraint",
+    "pinball": "npm run dev -w pinball"
   }
 }
