@@ -70,6 +70,8 @@ export class Canvas {
 			color = '#000',
 		} = props;
 
+		ctx.save();
+
 		ctx.strokeStyle = color;
 		ctx.lineWidth = width;
 		ctx.beginPath();
@@ -77,6 +79,8 @@ export class Canvas {
 		ctx.lineTo(p2.x, p2.y);
 		ctx.closePath();
 		ctx.stroke();
+
+		ctx.restore();
 	}
 
 	drawRect(props: RectProps) {
@@ -87,6 +91,8 @@ export class Canvas {
 			color = '#000',
 			filled = true
 		} = props;
+
+		ctx.save();
 
 		ctx.beginPath();
 		ctx.rect(x, y, width, height);
@@ -99,6 +105,8 @@ export class Canvas {
 			ctx.strokeStyle = color;
 			ctx.stroke();
 		}
+
+		ctx.restore();
 	}
 
 	drawCircle(props: CircleProps) {
@@ -109,6 +117,8 @@ export class Canvas {
 			color = '#000',
 			filled = true,
 		} = props;
+
+		ctx.save();
 
 		ctx.beginPath();
 		ctx.arc(position.x, position.y, radius, 0.0, 2.0 * Math.PI);
@@ -121,5 +131,7 @@ export class Canvas {
 			ctx.strokeStyle = color;
 			ctx.stroke();
 		}
+
+		ctx.restore();
 	}
 }
