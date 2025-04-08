@@ -37,6 +37,7 @@ function setupScene() {
 	world.score = 0;
 
 	// border
+	world.borderVerticies = [];
 	world.borderVerticies.push(new Vec2(0.74, 0.25));
 	world.borderVerticies.push(new Vec2(1 - offset, 0.4));
 	world.borderVerticies.push(new Vec2(1 - offset, flipperHeight - offset));
@@ -67,15 +68,15 @@ function setupScene() {
 		restitution: 0.2,
 	}));
 
-	// obstacles
+	// bumpers
 	world.bumpers = [];
-
 	world.bumpers.push(new Bumper(0.1, new Vec2(0.25, 0.6), 2));
 	world.bumpers.push(new Bumper(0.1, new Vec2(0.75, 0.5), 2));
 	world.bumpers.push(new Bumper(0.12, new Vec2(0.7, 1.0), 2));
 	world.bumpers.push(new Bumper(0.1, new Vec2(0.2, 1.2), 2));
 
 	// flippers
+	world.flippers = [];
 	const flipperRadius = 0.03;
 	const length = 0.2;
 	const maxRotation = 1.0;
@@ -144,12 +145,12 @@ function draw() {
 		});
 	}
 
-	// obstacles
+	// bumpers
 	for (let i = 0; i < world.bumpers.length; i++) {
-		const obstacle = world.bumpers[i];
+		const bumper = world.bumpers[i];
 		canvas.drawCircle({
-			position: worldToCanvas(obstacle.position),
-			radius: obstacle.radius * camera.scale,
+			position: worldToCanvas(bumper.position),
+			radius: bumper.radius * camera.scale,
 			color: '#ff8000',
 		});
 	}
