@@ -1,6 +1,6 @@
 import {Vec2} from 'p2d-vec2';
 import {Ball} from './ball';
-import {Obstacle} from './obstacle';
+import {Bumper} from './bumper';
 import {Flipper} from './flipper';
 
 function closestPointOnSegment(p: Vec2, a: Vec2, b: Vec2) {
@@ -44,7 +44,7 @@ export function handleBallBallCollision(ball1: Ball, ball2: Ball) {
 	ball2.velocity.add(dir, newV2 - v2);
 }
 
-export function handleBallObstacleCollision(ball: Ball, obstacle: Obstacle, physicsScene: {score: number}) {
+export function handleBallObstacleCollision(ball: Ball, obstacle: Bumper, physicsScene: {score: number}) {
 	const dir = Vec2.subtract(ball.position, obstacle.position);
 	const d = dir.length;
 

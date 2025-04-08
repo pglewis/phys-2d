@@ -1,6 +1,6 @@
 import {Vec2} from 'p2d-vec2';
 
-export class Obstacle {
+export class Bumper {
 	radius: number;
 	position: Vec2;
 	pushVel: number;

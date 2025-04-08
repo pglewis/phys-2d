@@ -2,14 +2,9 @@ import {Vec2} from 'p2d-vec2';
 import {Canvas} from 'p2d-canvas';
 import {Camera} from 'p2d-camera';
 import {Ball} from './ball';
-import {Obstacle} from './obstacle';
+import {Bumper} from './bumper';
 import {Flipper} from './flipper';
-import {
-	handleBallBallCollision,
-	handleBallBorderCollision,
-	handleBallFlipperCollision,
-	handleBallObstacleCollision
-} from './collisions';
+import {World} from './world';
 
 const reset = document.getElementById('reset-button') as HTMLButtonElement;
 reset.addEventListener('click', () => setupScene());
@@ -35,96 +30,81 @@ const simHeight = canvas.height / camera.scale;
 
 // --------------------------------------------------------------
 
-const physicsScene = {
-	gravity: new Vec2(0, -3),
-	tDelta: 1 / 60,
-	score: 0,
-	paused: true,
-	border: [] as Vec2[],
-	balls: [] as Ball[],
-	obstacles: [] as Obstacle[],
-	flippers: [] as Flipper[]
-};
+const world = new World({});
 
 function setupScene() {
 	const offset = 0.02;
-	physicsScene.score = 0;
+	world.score = 0;
 
 	// border
-	physicsScene.border.push(new Vec2(0.74, 0.25));
-	physicsScene.border.push(new Vec2(1 - offset, 0.4));
-	physicsScene.border.push(new Vec2(1 - offset, flipperHeight - offset));
-	physicsScene.border.push(new Vec2(offset, flipperHeight - offset));
-	physicsScene.border.push(new Vec2(offset, 0.4));
-	physicsScene.border.push(new Vec2(0.26, 0.25));
-	physicsScene.border.push(new Vec2(0.26, 0));
-	physicsScene.border.push(new Vec2(0.74, 0));
+	world.borderVerticies.push(new Vec2(0.74, 0.25));
+	world.borderVerticies.push(new Vec2(1 - offset, 0.4));
+	world.borderVerticies.push(new Vec2(1 - offset, flipperHeight - offset));
+	world.borderVerticies.push(new Vec2(offset, flipperHeight - offset));
+	world.borderVerticies.push(new Vec2(offset, 0.4));
+	world.borderVerticies.push(new Vec2(0.26, 0.25));
+	world.borderVerticies.push(new Vec2(0.26, 0));
+	world.borderVerticies.push(new Vec2(0.74, 0));
 
 	// ball
-	{
-		physicsScene.balls = [];
-		const radius = 0.03;
-		const mass = Math.PI * radius * radius;
+	world.balls = [];
+	const ballRadius = 0.03;
+	const mass = Math.PI * ballRadius * ballRadius;
 
-		physicsScene.balls.push(new Ball({
-			radius: radius,
-			mass: mass,
-			position: new Vec2(0.92, 0.5),
-			velocity: new Vec2(-0.2, 3.5),
-			restitution: 0.2,
-		}));
+	world.balls.push(new Ball({
+		radius: ballRadius,
+		mass: mass,
+		position: new Vec2(0.92, 0.5),
+		velocity: new Vec2(-0.2, 3.5),
+		restitution: 0.2,
+	}));
 
-		physicsScene.balls.push(new Ball({
-			radius: radius,
-			mass: mass,
-			position: new Vec2(0.08, 0.5),
-			velocity: new Vec2(0.2, 3.5),
-			restitution: 0.2,
-		}));
-	}
+	world.balls.push(new Ball({
+		radius: ballRadius,
+		mass: mass,
+		position: new Vec2(0.08, 0.5),
+		velocity: new Vec2(0.2, 3.5),
+		restitution: 0.2,
+	}));
 
 	// obstacles
-	{
-		physicsScene.obstacles = [];
+	world.bumpers = [];
 
-		physicsScene.obstacles.push(new Obstacle(0.1, new Vec2(0.25, 0.6), 2));
-		physicsScene.obstacles.push(new Obstacle(0.1, new Vec2(0.75, 0.5), 2));
-		physicsScene.obstacles.push(new Obstacle(0.12, new Vec2(0.7, 1.0), 2));
-		physicsScene.obstacles.push(new Obstacle(0.1, new Vec2(0.2, 1.2), 2));
-	}
+	world.bumpers.push(new Bumper(0.1, new Vec2(0.25, 0.6), 2));
+	world.bumpers.push(new Bumper(0.1, new Vec2(0.75, 0.5), 2));
+	world.bumpers.push(new Bumper(0.12, new Vec2(0.7, 1.0), 2));
+	world.bumpers.push(new Bumper(0.1, new Vec2(0.2, 1.2), 2));
 
 	// flippers
-	{
-		const radius = 0.03;
-		const length = 0.2;
-		const maxRotation = 1.0;
-		const restAngle = 0.5;
-		const angularVelocity = 10.0;
-		const restitution = 0.0;
+	const flipperRadius = 0.03;
+	const length = 0.2;
+	const maxRotation = 1.0;
+	const restAngle = 0.5;
+	const angularVelocity = 10.0;
+	const restitution = 0.0;
 
-		const pos1 = new Vec2(0.26, 0.22);
-		const pos2 = new Vec2(0.74, 0.22);
+	const pos1 = new Vec2(0.26, 0.22);
+	const pos2 = new Vec2(0.74, 0.22);
 
-		physicsScene.flippers.push(new Flipper({
-			radius: radius,
-			position: pos1,
-			length: length,
-			restAngle: -restAngle,
-			maxRotation: maxRotation,
-			angularVelocity: angularVelocity,
-			restitution: restitution,
-		}));
+	world.flippers.push(new Flipper({
+		radius: flipperRadius,
+		position: pos1,
+		length: length,
+		restAngle: -restAngle,
+		maxRotation: maxRotation,
+		angularVelocity: angularVelocity,
+		restitution: restitution,
+	}));
 
-		physicsScene.flippers.push(new Flipper({
-			radius: radius,
-			position: pos2,
-			length: length,
-			restAngle: Math.PI + restAngle,
-			maxRotation: -maxRotation,
-			angularVelocity: angularVelocity,
-			restitution: restitution,
-		}));
-	}
+	world.flippers.push(new Flipper({
+		radius: flipperRadius,
+		position: pos2,
+		length: length,
+		restAngle: Math.PI + restAngle,
+		maxRotation: -maxRotation,
+		angularVelocity: angularVelocity,
+		restitution: restitution,
+	}));
 }
 
 function worldToCanvas(v: Vec2): Vec2 {
@@ -135,40 +115,38 @@ function worldToCanvas(v: Vec2): Vec2 {
 }
 
 function draw() {
-	const c = canvas.ctx;
+	const {ctx} = canvas;
 
-	c.clearRect(0, 0, canvas.width, canvas.height);
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 	// border
-	if (physicsScene.border.length >= 2) {
+	if (world.borderVerticies.length >= 2) {
+		ctx.lineWidth = 5;
+		let v = worldToCanvas(world.borderVerticies[0]);
 
-		c.lineWidth = 5;
-		let v = worldToCanvas(physicsScene.border[0]);
-
-		c.beginPath();
-		c.moveTo(v.x, v.y);
-		for (let i = 1; i < physicsScene.border.length + 1; i++) {
-			v = worldToCanvas(physicsScene.border[i % physicsScene.border.length]);
-			c.lineTo(v.x, v.y);
+		ctx.beginPath();
+		ctx.moveTo(v.x, v.y);
+		for (let i = 1; i < world.borderVerticies.length + 1; i++) {
+			v = worldToCanvas(world.borderVerticies[i % world.borderVerticies.length]);
+			ctx.lineTo(v.x, v.y);
 		}
-		c.stroke();
-		c.lineWidth = 1;
+		ctx.stroke();
+		ctx.lineWidth = 1;
 	}
 
 	// balls
-	c.fillStyle = '#202020';
-
-	for (let i = 0; i < physicsScene.balls.length; i++) {
-		const ball = physicsScene.balls[i];
+	for (let i = 0; i < world.balls.length; i++) {
+		const ball = world.balls[i];
 		canvas.drawCircle({
 			position: worldToCanvas(ball.position),
 			radius: ball.radius * camera.scale,
+			color: '#202020',
 		});
 	}
 
 	// obstacles
-	for (let i = 0; i < physicsScene.obstacles.length; i++) {
-		const obstacle = physicsScene.obstacles[i];
+	for (let i = 0; i < world.bumpers.length; i++) {
+		const obstacle = world.bumpers[i];
 		canvas.drawCircle({
 			position: worldToCanvas(obstacle.position),
 			radius: obstacle.radius * camera.scale,
@@ -177,16 +155,20 @@ function draw() {
 	}
 
 	// flippers
-	for (let i = 0; i < physicsScene.flippers.length; i++) {
-		const flipper = physicsScene.flippers[i];
+	for (let i = 0; i < world.flippers.length; i++) {
+		const flipper = world.flippers[i];
 		const flipperToCanvas = worldToCanvas(flipper.position);
 
-		c.translate(flipperToCanvas.x, flipperToCanvas.y);
-		c.rotate(-flipper.restAngle - flipper.sign * flipper.rotation);
+		ctx.translate(flipperToCanvas.x, flipperToCanvas.y);
+		ctx.rotate(-flipper.restAngle - flipper.sign * flipper.rotation);
 
-		c.fillStyle = '#FF0000';
-		c.fillRect(0.0, -flipper.radius * camera.scale,
-			flipper.length * camera.scale, 2.0 * flipper.radius * camera.scale);
+		canvas.drawRect({
+			x: 0,
+			y: -flipper.radius * camera.scale,
+			width: flipper.length * camera.scale,
+			height: 2 * flipper.radius * camera.scale,
+			color: '#f00',
+		});
 
 		canvas.drawCircle({
 			position: Vec2.zero(),
@@ -199,47 +181,20 @@ function draw() {
 			radius: flipper.radius * camera.scale,
 			color: '#f00',
 		});
-		c.resetTransform();
-	}
-}
 
-function simulate() {
-	for (let i = 0; i < physicsScene.flippers.length; i++)
-		physicsScene.flippers[i].simulate(physicsScene.tDelta);
-
-	for (let i = 0; i < physicsScene.balls.length; i++) {
-		const ball = physicsScene.balls[i];
-		ball.simulate(physicsScene.tDelta, physicsScene.gravity);
-
-		for (let j = i + 1; j < physicsScene.balls.length; j++) {
-			const ball2 = physicsScene.balls[j];
-			handleBallBallCollision(ball, ball2);
-		}
-
-		for (let j = 0; j < physicsScene.obstacles.length; j++) {
-			handleBallObstacleCollision(ball, physicsScene.obstacles[j], physicsScene);
-		}
-
-		for (let j = 0; j < physicsScene.flippers.length; j++) {
-			handleBallFlipperCollision(ball, physicsScene.flippers[j]);
-		}
-
-		handleBallBorderCollision(ball, physicsScene.border);
+		ctx.resetTransform();
 	}
 }
 
 function update() {
-	simulate();
+	world.simulate();
 	draw();
-	scoreElement.innerHTML = physicsScene.score.toString();
+	scoreElement.innerHTML = world.score.toString();
 	requestAnimationFrame(update);
 }
 
-canvas.canvas.addEventListener('touchstart', onTouchStart, false);
-canvas.canvas.addEventListener('touchend', onTouchEnd, false);
-
-canvas.canvas.addEventListener('mousedown', onMouseDown, false);
-canvas.canvas.addEventListener('mouseup', onMouseUp, false);
+canvas.addEventListener('touchstart', onTouchStart, false);
+canvas.addEventListener('touchend', onTouchEnd, false);
 
 function onTouchStart(event: TouchEvent) {
 	for (let i = 0; i < event.touches.length; i++) {
@@ -250,8 +205,8 @@ function onTouchStart(event: TouchEvent) {
 			(touch.clientX - rect.left) / camera.scale,
 			simHeight - (touch.clientY - rect.top) / camera.scale);
 
-		for (let j = 0; j < physicsScene.flippers.length; j++) {
-			const flipper = physicsScene.flippers[j];
+		for (let j = 0; j < world.flippers.length; j++) {
+			const flipper = world.flippers[j];
 			if (flipper.select(touchPos))
 				flipper.touchIdentifier = touch.identifier;
 		}
@@ -259,9 +214,8 @@ function onTouchStart(event: TouchEvent) {
 }
 
 function onTouchEnd(event: TouchEvent) {
-
-	for (let i = 0; i < physicsScene.flippers.length; i++) {
-		const flipper = physicsScene.flippers[i];
+	for (let i = 0; i < world.flippers.length; i++) {
+		const flipper = world.flippers[i];
 
 		if (flipper.touchIdentifier < 0) {
 			continue;
@@ -280,26 +234,48 @@ function onTouchEnd(event: TouchEvent) {
 	}
 }
 
-function onMouseDown(event: MouseEvent) {
+canvas.addEventListener('mousedown', (event) => {
 	const rect = canvas.canvas.getBoundingClientRect();
 	const mousePos = new Vec2(
 		(event.clientX - rect.left) / camera.scale,
 		simHeight - (event.clientY - rect.top) / camera.scale
 	);
 
-	for (let j = 0; j < physicsScene.flippers.length; j++) {
-		const flipper = physicsScene.flippers[j];
+	for (let j = 0; j < world.flippers.length; j++) {
+		const flipper = world.flippers[j];
 		if (flipper.select(mousePos)) {
 			flipper.touchIdentifier = 0;
 		}
 	}
-}
+});
 
-function onMouseUp() {
-	for (let i = 0; i < physicsScene.flippers.length; i++) {
-		physicsScene.flippers[i].touchIdentifier = -1;
+canvas.addEventListener('mouseup', () => {
+	for (let i = 0; i < world.flippers.length; i++) {
+		world.flippers[i].touchIdentifier = -1;
 	}
-}
+});
+
+document.addEventListener('keydown', (event) => {
+	switch (event.key) {
+		case 'ArrowLeft':
+			world.flippers[0].touchIdentifier = 1;
+			break;
+		case 'ArrowRight':
+			world.flippers[1].touchIdentifier = 1;
+			break;
+	}
+});
+
+document.addEventListener('keyup', (event) => {
+	switch (event.key) {
+		case 'ArrowLeft':
+			world.flippers[0].touchIdentifier = -1;
+			break;
+		case 'ArrowRight':
+			world.flippers[1].touchIdentifier = -1;
+			break;
+	}
+});
 
 setupScene();
 update();
