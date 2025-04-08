@@ -12,8 +12,7 @@ export type LineProps = {
 };
 
 export type RectProps = {
-	x: number
-	y: number
+	topLeft: {x: number, y: number}
 	width: number
 	height: number
 	color?: string | CanvasGradient | CanvasPattern
@@ -86,8 +85,9 @@ export class Canvas {
 	drawRect(props: RectProps) {
 		const {ctx} = this;
 		const {
-			x, y,
-			width, height,
+			topLeft,
+			width,
+			height,
 			color = '#000',
 			filled = true
 		} = props;
@@ -95,7 +95,7 @@ export class Canvas {
 		ctx.save();
 
 		ctx.beginPath();
-		ctx.rect(x, y, width, height);
+		ctx.rect(topLeft.x, topLeft.y, width, height);
 		ctx.closePath();
 
 		if (filled) {
