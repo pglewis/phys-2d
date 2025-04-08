@@ -26,6 +26,12 @@ export type CircleProps = {
 	filled?: boolean
 };
 
+export type PathProps = {
+	points: {x: number, y: number}[],
+	width?: number,
+	color?: string | CanvasGradient | CanvasPattern
+}
+
 export class Canvas {
 	canvas: HTMLCanvasElement;
 	ctx: CanvasRenderingContext2D;
@@ -131,6 +137,29 @@ export class Canvas {
 			ctx.strokeStyle = color;
 			ctx.stroke();
 		}
+
+		ctx.restore();
+	}
+
+	drawPath(props: PathProps) {
+		const {ctx} = this;
+		const {
+			points,
+			width = 1,
+			color = '#000',
+		} = props;
+
+		ctx.save();
+		ctx.lineWidth = width;
+		ctx.strokeStyle = color;
+
+		ctx.beginPath();
+		ctx.moveTo(points[0].x, points[0].y);
+		for (let i = 1; i < points.length + 1; i++) {
+			const v = points[i % points.length];
+			ctx.lineTo(v.x, v.y);
+		}
+		ctx.stroke();
 
 		ctx.restore();
 	}
