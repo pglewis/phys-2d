@@ -19,8 +19,11 @@ export class World {
 	flippers = [] as Flipper[];
 
 	constructor(props: WorldProps) {
+		const {sin, PI} = Math;
 		const {
-			gravity = new Vec2(0, -1.15),
+			// table slope = 6.5 degrees, gravity = 9.8 m/s^2
+			// Ignoring friction: a = g * sin(theta)
+			gravity = new Vec2(0, -9.8 * sin(6.5 * (PI / 180))),
 			tDelta = 1 / 60,
 			score = 0,
 		} = props;
@@ -45,7 +48,7 @@ export class World {
 			}
 
 			for (let j = 0; j < this.bumpers.length; j++) {
-				this.handleBallBumperCollision(ball, this.bumpers[j], this);
+				this.handleBallBumperCollision(ball, this.bumpers[j]);
 			}
 
 			for (let j = 0; j < this.flippers.length; j++) {
@@ -97,7 +100,7 @@ export class World {
 		ball2.velocity.add(dir, newV2 - v2);
 	}
 
-	private handleBallBumperCollision(ball: Ball, bumper: Bumper, physicsScene: {score: number}) {
+	private handleBallBumperCollision(ball: Ball, bumper: Bumper) {
 		const dir = Vec2.subtract(ball.position, bumper.position);
 		const d = dir.length;
 
@@ -113,7 +116,7 @@ export class World {
 		const v = ball.velocity.dot(dir);
 		ball.velocity.add(dir, bumper.pushVel - v);
 
-		physicsScene.score++;
+		this.score++;
 	}
 
 	private handleBallFlipperCollision(ball: Ball, flipper: Flipper) {

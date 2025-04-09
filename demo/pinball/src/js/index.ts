@@ -1,13 +1,13 @@
 import {Vec2} from 'p2d-vec2';
 import {Canvas} from 'p2d-canvas';
 import {Camera} from 'p2d-camera';
+import {World} from './world';
 import {Ball} from './ball';
 import {Bumper} from './bumper';
 import {Flipper} from './flipper';
-import {World} from './world';
 
-const reset = document.getElementById('reset-button') as HTMLButtonElement;
-reset.addEventListener('click', () => setupScene());
+const resetButton = document.getElementById('reset-button') as HTMLButtonElement;
+resetButton.addEventListener('click', () => reset());
 
 const scoreElement = document.getElementById('score') as HTMLElement;
 
@@ -17,40 +17,45 @@ const canvas = new Canvas({
 	height: 500
 });
 
-const flipperHeight = 1.7;
+const HEIGHT_IN_M = 1.7;
 
 const camera = new Camera({
 	position: Vec2.zero(),
-	scale: canvas.height / flipperHeight,
+	scale: canvas.height / HEIGHT_IN_M,
 });
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const simWidth = canvas.width / camera.scale;
-const simHeight = canvas.height / camera.scale;
-
-// --------------------------------------------------------------
 
 const world = new World({});
 
-function setupScene() {
+// --------------------------------------------------------------
+
+function reset() {
 	const offset = 0.02;
 	world.score = 0;
 
+	// Typical real world table: 20.25" wide by 45" high
+	// Another source: 20.37" X 36.25" for the playing surface
+	//     0.5174 m wide, 0.9208 m high
+
 	// border
-	world.borderVerticies = [];
-	world.borderVerticies.push(new Vec2(0.74, 0.25));
-	world.borderVerticies.push(new Vec2(1 - offset, 0.4));
-	world.borderVerticies.push(new Vec2(1 - offset, flipperHeight - offset));
-	world.borderVerticies.push(new Vec2(offset, flipperHeight - offset));
-	world.borderVerticies.push(new Vec2(offset, 0.4));
-	world.borderVerticies.push(new Vec2(0.26, 0.25));
-	world.borderVerticies.push(new Vec2(0.26, 0));
-	world.borderVerticies.push(new Vec2(0.74, 0));
+	world.borderVerticies = [
+		new Vec2(0.74, 0.25),
+		new Vec2(1 - offset, 0.4),
+		new Vec2(1 - offset, HEIGHT_IN_M - offset),
+		new Vec2(offset, HEIGHT_IN_M - offset),
+		new Vec2(offset, 0.4),
+		new Vec2(0.26, 0.25),
+		new Vec2(0.26, 0),
+		new Vec2(0.74, 0),
+	];
 
 	// ball
 	world.balls = [];
 	const ballRadius = 0.03;
 	const mass = Math.PI * ballRadius * ballRadius;
+
+	// Real world:
+	// const ballRadius = 0.0135; // Pinball diameter of 27mm
+	// const mass = 0.0806;
 
 	world.balls.push(new Ball({
 		radius: ballRadius,
@@ -109,6 +114,7 @@ function setupScene() {
 }
 
 function worldToCanvas(v: Vec2): Vec2 {
+	// World to camera space
 	const cameraSpace = camera.transform(v);
 
 	// Canvas space has a top left origin
@@ -118,22 +124,13 @@ function worldToCanvas(v: Vec2): Vec2 {
 function draw() {
 	const {ctx} = canvas;
 
-	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	canvas.clear();
 
 	// border
-	if (world.borderVerticies.length >= 2) {
-		ctx.lineWidth = 5;
-		let v = worldToCanvas(world.borderVerticies[0]);
-
-		ctx.beginPath();
-		ctx.moveTo(v.x, v.y);
-		for (let i = 1; i < world.borderVerticies.length + 1; i++) {
-			v = worldToCanvas(world.borderVerticies[i % world.borderVerticies.length]);
-			ctx.lineTo(v.x, v.y);
-		}
-		ctx.stroke();
-		ctx.lineWidth = 1;
-	}
+	canvas.drawPath({
+		points: world.borderVerticies.map(worldToCanvas),
+		width: 5
+	});
 
 	// balls
 	for (let i = 0; i < world.balls.length; i++) {
@@ -164,8 +161,7 @@ function draw() {
 		ctx.rotate(-flipper.restAngle - flipper.sign * flipper.rotation);
 
 		canvas.drawRect({
-			x: 0,
-			y: -flipper.radius * camera.scale,
+			topLeft: new Vec2(0, -flipper.radius * camera.scale),
 			width: flipper.length * camera.scale,
 			height: 2 * flipper.radius * camera.scale,
 			color: '#f00',
@@ -194,68 +190,6 @@ function update() {
 	requestAnimationFrame(update);
 }
 
-canvas.addEventListener('touchstart', onTouchStart, false);
-canvas.addEventListener('touchend', onTouchEnd, false);
-
-function onTouchStart(event: TouchEvent) {
-	for (let i = 0; i < event.touches.length; i++) {
-		const touch = event.touches[i];
-
-		const rect = canvas.canvas.getBoundingClientRect();
-		const touchPos = new Vec2(
-			(touch.clientX - rect.left) / camera.scale,
-			simHeight - (touch.clientY - rect.top) / camera.scale);
-
-		for (let j = 0; j < world.flippers.length; j++) {
-			const flipper = world.flippers[j];
-			if (flipper.select(touchPos))
-				flipper.touchIdentifier = touch.identifier;
-		}
-	}
-}
-
-function onTouchEnd(event: TouchEvent) {
-	for (let i = 0; i < world.flippers.length; i++) {
-		const flipper = world.flippers[i];
-
-		if (flipper.touchIdentifier < 0) {
-			continue;
-		}
-
-		let found = false;
-		for (let j = 0; j < event.touches.length; j++) {
-			if (event.touches[j].identifier === flipper.touchIdentifier) {
-				found = true;
-			}
-		}
-
-		if (!found) {
-			flipper.touchIdentifier = -1;
-		}
-	}
-}
-
-canvas.addEventListener('mousedown', (event) => {
-	const rect = canvas.canvas.getBoundingClientRect();
-	const mousePos = new Vec2(
-		(event.clientX - rect.left) / camera.scale,
-		simHeight - (event.clientY - rect.top) / camera.scale
-	);
-
-	for (let j = 0; j < world.flippers.length; j++) {
-		const flipper = world.flippers[j];
-		if (flipper.select(mousePos)) {
-			flipper.touchIdentifier = 0;
-		}
-	}
-});
-
-canvas.addEventListener('mouseup', () => {
-	for (let i = 0; i < world.flippers.length; i++) {
-		world.flippers[i].touchIdentifier = -1;
-	}
-});
-
 document.addEventListener('keydown', (event) => {
 	switch (event.key) {
 		case 'ArrowLeft':
@@ -278,5 +212,5 @@ document.addEventListener('keyup', (event) => {
 	}
 });
 
-setupScene();
+reset();
 update();
