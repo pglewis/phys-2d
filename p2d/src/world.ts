@@ -119,36 +119,46 @@ export class World {
 
 		const {geometry} = staticBody;
 
-		if (geometry instanceof CircleGeometry) {
-			this.handleCircleCollision(dynamicBody, staticBody);
-
-		} else if (geometry instanceof PathGeometry) {
-			if (geometry.verticies.length >= 2) {
-				const points = geometry.verticies;
-				for (let k = 0; k < points.length - 1; k++) {
-					const segment = {p1: points[k], p2: points[k + 1]};
-					this.handleCircleLineSegmentCollision(dynamicBody, segment);
-				}
-				if (points.length > 2) {
-					const lastSegment = {p1: points[points.length - 1], p2: points[0]};
-					this.handleCircleLineSegmentCollision(dynamicBody, lastSegment);
-				}
+		switch (true) {
+			case (geometry instanceof CircleGeometry): {
+				this.handleCircleCollision(dynamicBody, staticBody);
+				break;
 			}
 
-		} else if (geometry instanceof PolygonGeometry) {
-			if (geometry.verticies.length >= 2) {
-				const vertices = geometry.verticies;
-				for (let k = 0; k < vertices.length; k++) {
-					const p1 = vertices[k];
-					const p2 = vertices[(k + 1) % vertices.length];
-					this.handleCircleLineSegmentCollision(dynamicBody, {p1, p2});
-				}
+			case (geometry instanceof EdgeGeometry): {
+				this.handleCircleLineSegmentCollision(
+					dynamicBody,
+					{p1: geometry.p1, p2: geometry.p2}
+				);
+				break;
 			}
-		} else if (geometry instanceof EdgeGeometry) {
-			this.handleCircleLineSegmentCollision(
-				dynamicBody,
-				{p1: geometry.p1, p2: geometry.p2}
-			);
+
+			case (geometry instanceof PathGeometry): {
+				if (geometry.verticies.length >= 2) {
+					const points = geometry.verticies;
+					for (let k = 0; k < points.length - 1; k++) {
+						const segment = {p1: points[k], p2: points[k + 1]};
+						this.handleCircleLineSegmentCollision(dynamicBody, segment);
+					}
+					if (points.length > 2) {
+						const lastSegment = {p1: points[points.length - 1], p2: points[0]};
+						this.handleCircleLineSegmentCollision(dynamicBody, lastSegment);
+					}
+				}
+				break;
+			}
+
+			case (geometry instanceof PolygonGeometry): {
+				if (geometry.verticies.length >= 2) {
+					const vertices = geometry.verticies;
+					for (let k = 0; k < vertices.length; k++) {
+						const p1 = vertices[k];
+						const p2 = vertices[(k + 1) % vertices.length];
+						this.handleCircleLineSegmentCollision(dynamicBody, {p1, p2});
+					}
+				}
+				break;
+			}
 		}
 	}
 
