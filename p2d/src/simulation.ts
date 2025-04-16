@@ -39,6 +39,10 @@ export class Simulation {
 		this.substeps = substeps;
 	}
 
+	isRunning() {
+		return this.running;
+	}
+
 	start() {
 		this.running = true;
 		this.mainLoop();
