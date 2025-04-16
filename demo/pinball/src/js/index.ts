@@ -1,7 +1,5 @@
-import {Vec2} from 'p2d-vec2';
-import {Canvas} from 'p2d-canvas';
-import {Camera} from 'p2d-camera';
-import {World} from './world';
+import {Vec2, Canvas, Camera} from 'p2d';
+import {World} from './world'; //--!! Old implementation
 import {Ball} from './ball';
 import {Bumper} from './bumper';
 import {Flipper} from './flipper';

@@ -1,15 +1,12 @@
 {
-    "name": "p2d-canvas",
-    "description": "Canvas",
+    "name": "p2d",
+    "description": "2D physics library",
     "private": "true",
     "version": "0.0.0",
     "type": "module",
-    "main": "./dist/canvas.js",
-    "exports": {
-        ".": {
-            "types": "./dist/canvas.d.ts",
-            "import": "./dist/canvas.js"
-        }
+    "main": "./src/index.ts",
+    "dependencies": {
+        "p2d": "0.0.0"
     },
     "devDependencies": {
         "@eslint/js": "^9.18.0",

@@ -22,7 +22,7 @@ export default tseslint.config(
 			'@stylistic/js/brace-style': ['error', '1tbs'],
 			'@stylistic/js/indent': ['error', 'tab', {'SwitchCase': 1}],
 			'@stylistic/js/no-trailing-spaces': 'error',
-			'@stylistic/js/no-multi-spaces': 'error',
+			'@stylistic/js/no-multi-spaces': ['error', {'ignoreEOLComments': true}],
 			'@stylistic/js/no-tabs': ['error', {allowIndentationTabs: true}],
 			'@stylistic/js/no-multiple-empty-lines': ['error', {max: 2, maxBOF: 1, maxEOF: 1}],
 			'@stylistic/js/no-whitespace-before-property': 'error',

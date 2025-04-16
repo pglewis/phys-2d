@@ -1,8 +1,7 @@
-import {Vec2} from 'p2d-vec2';
-import {Canvas} from 'p2d-canvas';
+import {Vec2, Canvas} from 'p2d';
 import {Wire} from './wire';
 import {Bead} from './bead';
-import {World} from './world';
+import {World} from './world'; //--!! old implementation
 
 const PIXEL_W = 720;
 const PIXEL_H = 500;

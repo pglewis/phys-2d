@@ -2,7 +2,7 @@
   "name": "phys-2d-monorepo",
   "private": true,
   "workspaces": [
-      "lib/*",
+      "p2d",
       "demo/*"
   ],
   "scripts": {

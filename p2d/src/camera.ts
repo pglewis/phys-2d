@@ -1,4 +1,4 @@
-import {Vec2} from 'p2d-vec2';
+import {Vec2} from './vec2';
 
 export type CameraState = {
 	position: Vec2

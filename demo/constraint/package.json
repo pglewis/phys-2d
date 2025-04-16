@@ -5,9 +5,7 @@
     "version": "1.0.0",
     "type": "module",
     "dependencies": {
-        "p2d-vec2": "0.0.0",
-        "p2d-canvas": "0.0.0",
-        "p2d-camera": "0.0.0"
+        "p2d": "0.0.0"
     },
     "devDependencies": {
         "@eslint/js": "^9.18.0",

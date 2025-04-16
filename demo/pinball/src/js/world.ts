@@ -1,4 +1,4 @@
-import {Vec2} from 'p2d-vec2';
+import {Vec2} from 'p2d';
 import {Ball} from './ball';
 import {Bumper} from './bumper';
 import {Flipper} from './flipper';
