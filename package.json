@@ -1,6 +1,7 @@
 {
   "name": "phys-2d-monorepo",
   "private": true,
+  "type": "module",
   "workspaces": [
       "p2d",
       "demo/*"
