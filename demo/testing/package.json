@@ -1,5 +1,6 @@
 {
-    "name": "body-dev",
+    "name": "testing",
+    "description": "Test bed for development",
     "private": true,
     "version": "1.0.0",
     "type": "module",
