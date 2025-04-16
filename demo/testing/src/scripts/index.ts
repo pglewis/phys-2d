@@ -8,6 +8,7 @@ import {
 	BodyTypes,
 	CircleGeometry,
 	PathGeometry,
+	EdgeGeometry,
 } from 'p2d';
 
 const HEIGHT_IN_M = 1.7;
@@ -26,7 +27,8 @@ const camera = new Camera({
 const world = new World({
 	// table slope = 6.5 degrees, gravity = 9.8 m/s^2
 	// Ignoring friction: a = g * sin(theta)
-	gravity: new Vec2(0, -9.8 * Math.sin(6.5 * (Math.PI / 180))),
+	//gravity: new Vec2(0, -9.8 * Math.sin(6.5 * (Math.PI / 180))),
+	gravity: new Vec2(0, -2.8),
 });
 
 const simulation = new Simulation({world, camera, canvas});
@@ -41,23 +43,24 @@ function reset() {
 }
 
 // --------------------------------------------------------------
+// A typical real world pinball table is about 20.37" X 36.25"
+// for the playing surface
+// 0.5174 m wide, 0.9208 m high
 
 function initBodies() {
-	// Typical real world table: 20.25" wide by 45" high
-	// Another source: 20.37" X 36.25" for the playing surface
-	//     0.5174 m wide, 0.9208 m high
 	balls();
-	bumpers();
+	//bumpers();
+	stuff();
 	playingFieldPath();
 }
 
 function balls() {
-	// Real world:
-	// const ballRadius = 0.0135; // Pinball diameter of 27mm
-	// const mass = 0.0806;
+	// Real world pinball:
+	// ballRadius = 0.0135; // diameter of 27mm
+	// mass = 0.0806;
 	const ballConfig = {
 		type: BodyTypes.dynamic,
-		geometry: new CircleGeometry(0.03),
+		geometry: new CircleGeometry(0.0225),
 		material: {
 			mass: 0.0806,
 			restitution: 1,
@@ -69,7 +72,51 @@ function balls() {
 			name: 'ball',
 			...ballConfig,
 			position: new Vec2(0.23, 1.6),
-			velocity: new Vec2(0.4, -1.3),
+			velocity: new Vec2(0.5, -0.4),
+		})
+	);
+}
+
+function stuff() {
+	const edgeConfig = {
+		type: BodyTypes.static,
+		position: new Vec2(),
+		velocity: new Vec2(),
+		material: {mass: Infinity, restitution: 1},
+	};
+
+	const bumperConfig = {
+		type: BodyTypes.static,
+		velocity: new Vec2(),
+		geometry: new CircleGeometry(0.07),
+		material: {mass: Infinity, restitution: 1},
+	};
+
+	world.addBody(
+		new SimBody({
+			name: 'Edge 1',
+			geometry: new EdgeGeometry(new Vec2(0.5, 0.5), new Vec2(0.85, 0.95)),
+			...edgeConfig,
+		}),
+		new SimBody({
+			name: 'Edge 2',
+			geometry: new EdgeGeometry(new Vec2(0.6, 1), new Vec2(0.3, 1.25)),
+			...edgeConfig,
+		}),
+		new SimBody({
+			name: 'bumper 1',
+			position: new Vec2(0.3, 0.8),
+			...bumperConfig,
+		}),
+		new SimBody({
+			name: 'bumper 2',
+			position: new Vec2(0.65, 1.5),
+			...bumperConfig,
+		}),
+		new SimBody({
+			name: 'bumper 2',
+			position: new Vec2(0.18, 1.45),
+			...bumperConfig,
 		})
 	);
 }
@@ -143,33 +190,28 @@ function playingFieldPath() {
 	));
 }
 
-const resetBtn = document.getElementById('reset-btn') as HTMLButtonElement;
+const playPauseBtn = document.getElementById('play-pause-btn') as HTMLButtonElement;
 const stepBtn = document.getElementById('step-btn') as HTMLButtonElement;
-const startBtn = document.getElementById('start-btn') as HTMLButtonElement;
-const stopBtn = document.getElementById('stop-btn') as HTMLButtonElement;
+const resetBtn = document.getElementById('reset-btn') as HTMLButtonElement;
 
 resetBtn.addEventListener('click', () => {
 	simulation.stop();
-	startBtn.disabled = false;
-	stopBtn.disabled = true;
+	playPauseBtn.textContent = '▶';
 	reset();
 });
 
 stepBtn.addEventListener('click', () => {
-	startBtn.disabled = false;
-	stopBtn.disabled = true;
+	playPauseBtn.textContent = '▶';
 	simulation.singleStep();
 });
 
-startBtn.addEventListener('click', () => {
-	startBtn.disabled = true;
-	stopBtn.disabled = false;
-	simulation.start();
-});
+playPauseBtn.addEventListener('click', () => {
 
-stopBtn.addEventListener('click', () => {
-	startBtn.disabled = false;
-	stopBtn.disabled = true;
-	simulation.stop();
+	if (!simulation.isRunning()) {
+		playPauseBtn.textContent = '⏸';
+		simulation.start();
+	} else {
+		playPauseBtn.textContent = '▶';
+		simulation.stop();
+	}
 });
-stopBtn.disabled = true;
