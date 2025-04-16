@@ -5,6 +5,7 @@ import {World} from './world';
 import {SimBody} from './sim-body';
 import {CircleGeometry} from './geometry/circle-geometry';
 import {PathGeometry} from './geometry/path-geometry';
+import {EdgeGeometry} from './geometry/edge-geometry';
 
 export interface SimulationState {
 	world: World
@@ -101,6 +102,14 @@ export class Simulation {
 		} else if (geometry instanceof PathGeometry) {
 			canvas.drawPath({
 				points: geometry.verticies.map(p => this.worldToCanvas(p)),
+				color: '#2f2',
+			});
+
+		} else if (geometry instanceof EdgeGeometry) {
+			canvas.drawLine({
+				p1: this.worldToCanvas(geometry.p1),
+				p2: this.worldToCanvas(geometry.p2),
+				width: 1,
 				color: '#2f2',
 			});
 
