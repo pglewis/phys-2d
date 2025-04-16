@@ -17,33 +17,6 @@ export enum BodyTypes {
 	dynamic,
 }
 
-// export type CircleGeometry = {
-// 	shape: GeometryTypes.circle
-// 	radius: number
-// }
-
-// export type PolygonGeometry = {
-// 	shape: GeometryTypes.polygon
-// 	vertices: Vec2[]
-// }
-
-// export type EdgeGeometry = {
-// 	shape: GeometryTypes.edge
-// 	start: Vec2
-// 	end: Vec2
-// }
-
-// export type PathGeometry = {
-// 	shape: GeometryTypes.path
-// 	points: Vec2[]
-// }
-
-// export type BodyGeometry =
-// 	| CircleGeometry
-// 	| PolygonGeometry
-// 	| EdgeGeometry
-// 	| PathGeometry
-
 export type BodyMaterial = {
 	mass: number
 	restitution: number
