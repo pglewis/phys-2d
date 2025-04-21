@@ -4,9 +4,14 @@
     "private": "true",
     "version": "0.0.0",
     "type": "module",
-    "main": "./src/index.ts",
+    "exports": {
+        "./src/*": {
+            "default": "./src/*.ts"
+        }
+    },
     "dependencies": {
-        "p2d": "0.0.0"
+        "p2d": "0.0.0",
+        "bitecs": "^0.3.40"
     },
     "devDependencies": {
         "@eslint/js": "^9.18.0",

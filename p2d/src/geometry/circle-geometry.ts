@@ -1,4 +1,4 @@
-import {Geometry, GeometryTypes} from './geometry.js';
+import {Geometry, GeometryTypes} from 'p2d/src/geometry/geometry';
 
 export class CircleGeometry extends Geometry {
 	radius: number;

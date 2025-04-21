@@ -1,5 +1,5 @@
-import {Vec2} from '../vec2.js';
-import {Geometry, GeometryTypes} from './geometry.js';
+import {Vec2} from 'p2d/src/vec2';
+import {Geometry, GeometryTypes} from 'p2d/src/geometry/geometry';
 
 export class EdgeGeometry extends Geometry {
 	p1: Vec2;

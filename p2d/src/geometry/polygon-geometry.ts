@@ -1,4 +1,4 @@
-import {Vec2} from '../vec2';
+import {Vec2} from 'p2d/src/vec2';
 import {Geometry, GeometryTypes} from './geometry.js';
 
 export class PolygonGeometry extends Geometry {

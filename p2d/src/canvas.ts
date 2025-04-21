@@ -1,35 +1,40 @@
 export type CanvasProps = {
 	parent?: HTMLElement;
-	width?: number
-	height?: number
+	width?: number;
+	height?: number;
 };
 
-export type LineProps = {
-	p1: {x: number, y: number}
-	p2: {x: number, y: number}
-	width: number
-	color?: string | CanvasGradient | CanvasPattern
+export interface Debuggable {
+	debug?: boolean;
+}
+
+export interface LineProps extends Debuggable {
+	p1: {x: number, y: number};
+	p2: {x: number, y: number};
+	width: number;
+	color?: string | CanvasGradient | CanvasPattern;
 };
 
-export type RectProps = {
-	topLeft: {x: number, y: number}
-	width: number
-	height: number
-	color?: string | CanvasGradient | CanvasPattern
-	filled?: boolean
+export interface RectProps extends Debuggable {
+	topLeft: {x: number, y: number};
+	width: number;
+	height: number;
+	color?: string | CanvasGradient | CanvasPattern;
+	filled?: boolean;
 };
 
-export type CircleProps = {
-	position: {x: number, y: number}
-	radius: number
-	color?: string | CanvasGradient | CanvasPattern
-	filled?: boolean
+export interface CircleProps extends Debuggable {
+	position: {x: number, y: number};
+	radius: number;
+	rotation?: number;
+	color?: string | CanvasGradient | CanvasPattern;
+	filled?: boolean;
 };
 
-export type PathProps = {
-	points: {x: number, y: number}[],
-	width?: number,
-	color?: string | CanvasGradient | CanvasPattern
+export interface PathProps extends Debuggable {
+	points: {x: number, y: number}[];
+	width?: number;
+	color?: string | CanvasGradient | CanvasPattern;
 }
 
 export class Canvas {
@@ -120,8 +125,10 @@ export class Canvas {
 		const {
 			position,
 			radius,
+			rotation = 0,
 			color = '#000',
 			filled = true,
+			debug = false,
 		} = props;
 
 		ctx.save();
@@ -135,6 +142,18 @@ export class Canvas {
 			ctx.fill();
 		} else {
 			ctx.strokeStyle = color;
+			ctx.stroke();
+		}
+
+		if (debug) {
+			// Draw the rotation line
+			ctx.beginPath();
+			ctx.moveTo(position.x, position.y);
+			ctx.lineTo(
+				position.x + radius * Math.cos(rotation),
+				position.y + radius * Math.sin(rotation)
+			);
+			ctx.strokeStyle = '#000';
 			ctx.stroke();
 		}
 
@@ -155,8 +174,8 @@ export class Canvas {
 
 		ctx.beginPath();
 		ctx.moveTo(points[0].x, points[0].y);
-		for (let i = 1; i < points.length + 1; i++) {
-			const v = points[i % points.length];
+		for (let i = 1; i < points.length; i++) {
+			const v = points[i];
 			ctx.lineTo(v.x, v.y);
 		}
 		ctx.stroke();
