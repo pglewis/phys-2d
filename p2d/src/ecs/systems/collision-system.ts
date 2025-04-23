@@ -8,14 +8,30 @@ import {EdgeGeometry} from 'p2d/src/geometry/edge-geometry';
 import {PathGeometry} from 'p2d/src/geometry/path-geometry';
 import {PolygonGeometry} from 'p2d/src/geometry/polygon-geometry';
 import {defineQuery} from 'bitecs';
+import {AABB} from '../../geometry/geometry.js';
+
+const collisionQuery = defineQuery([Transform, Rigidbody, Shape]);
+
+interface ContactPair {
+	entityA: number,
+	entityB: number
+}
 
 export class CollisionSystem implements System {
+	contactPairs!: ContactPair[];
 
 	update(world: object): void {
-		const entities = defineQuery([Transform, Rigidbody, Shape])(world);
+		this.contactPairs = [];
+		const entities = collisionQuery(world);
+		this.broadPhase(entities);
+		this.narrowPhase();
+	}
+
+	private broadPhase(entities: number[]): void {
 
 		for (let i = 0; i < entities.length - 1; i++) {
 			const entityA = entities[i];
+			const boxA = Shape.geometry[entityA].getAABB(Transform.position[entityA]);
 
 			for (let j = i + 1; j < entities.length; j++) {
 				const entityB = entities[j];
@@ -24,19 +40,46 @@ export class CollisionSystem implements System {
 				if (Rigidbody.isKinematic[entityA] && Rigidbody.isKinematic[entityB]) {
 					continue;
 				}
+				const boxB = Shape.geometry[entityB].getAABB(Transform.position[entityB]);
 
-				if (!Rigidbody.isKinematic[entityA] && !Rigidbody.isKinematic[entityB]) {
-					// Two dynamic bodies
-					this.circleCircleCollision(entityA, entityB);
-				} else if (Rigidbody.isKinematic[entityA]) {
-					// Entity A is static
-					this.handleStaticCollision(entityB, entityA);
-				} else {
-					// Entity B is static
-					this.handleStaticCollision(entityA, entityB);
+				if (this.aabbOverlaps(boxA, boxB)) {
+					this.contactPairs.push({entityA, entityB});
 				}
 			}
 		}
+	}
+
+	private narrowPhase(): void {
+
+		for (const pair of this.contactPairs) {
+			const entityA = pair.entityA;
+			const entityB = pair.entityB;
+
+			if (!Rigidbody.isKinematic[entityA] && !Rigidbody.isKinematic[entityB]) {
+				// Two dynamic bodies
+				this.circleCircleCollision(entityA, entityB);
+			} else if (Rigidbody.isKinematic[entityA]) {
+				// Entity A is static
+				this.handleStaticCollision(entityB, entityA);
+			} else {
+				// Entity B is static
+				this.handleStaticCollision(entityA, entityB);
+			}
+		}
+	}
+
+
+	private aabbOverlaps(boxA: AABB, boxB: AABB) {
+		if (
+			boxA.min.x > boxB.max.x ||
+			boxA.max.x < boxB.min.x ||
+			boxA.min.y > boxB.max.y ||
+			boxA.max.y < boxB.min.y
+		) {
+			return false; // No overlap
+		}
+
+		return true; // Overlap
 	}
 
 	private circleCircleCollision(entityA: number, entityB: number) {
