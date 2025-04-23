@@ -5,5 +5,6 @@ export const Renderable = {
 	scale: [] as number[],
 	offset: [] as Vec2[],
 	debug: [] as boolean[],
+	filled: [] as boolean[],
 };
 

@@ -1,122 +1,192 @@
 import {Vec2} from 'p2d/src/vec2';
 import {Simulation} from 'p2d/src/simulation';
 import {Canvas} from 'p2d/src/canvas';
-import {Camera, EdgeGeometry, PathGeometry} from 'p2d';
-import * as ECS from 'p2d/src/ecs/entity';
+import {Camera} from 'p2d/src/camera';
+import {CircleGeometry} from 'p2d/src/geometry/circle-geometry';
+import {PathGeometry} from 'p2d/src/geometry/path-geometry';
 import {RenderSystem} from 'p2d/src/ecs/systems/render-system';
-import {createTransform, createRigidbody, createShape, createRenderable} from 'p2d/src/ecs/components/factories';
-import {createBumper, createEdge, createPinball} from './objects';
+import {addComponent, addEntity, createWorld, resetWorld} from 'bitecs';
+import {Transform} from 'p2d/src/ecs/components/transform';
+import {Rigidbody} from 'p2d/src/ecs/components/rigidbody';
+import {Shape} from 'p2d/src/ecs/components/shape';
+import {Renderable} from 'p2d/src/ecs/components/renderable';
 
-const HEIGHT_IN_M = 1.7;
+export interface BallProps {
+	isKinematic?: boolean;
+	position: Vec2;
+	velocity: Vec2;
+	color?: string;
+	radius?: number;
+	mass?: number;
+	restitution?: number;
+	debug?: boolean;
+}
+
+const CANVAS_WIDTH = 720;
+const CANVAS_HEIGHT = 500;
+
+const WIDTH_IN_M = 50;
 
 const canvas = new Canvas({
 	parent: document.getElementById('canvas-container') as HTMLElement,
-	width: 720,
-	height: 500
+	width: CANVAS_WIDTH,
+	height: CANVAS_HEIGHT,
 });
 
 const camera = new Camera({
 	position: new Vec2(0, 0),
-	scale: canvas.height / HEIGHT_IN_M
+	scale: canvas.width / WIDTH_IN_M,
+});
+
+const world = createWorld({
+	components: {
+		Transform: Transform,
+		Rigidbody: Rigidbody,
+		Shape: Shape,
+		Renderable: Renderable,
+	}
 });
 
 const simulation = new Simulation({
-	// table slope = 6.5 degrees, gravity = 9.8 m/s^2
-	// Ignoring friction: a = g * sin(theta)
-	gravity: new Vec2(0, -9.8 * Math.sin(6.5 * (Math.PI / 180))),
-	renderSystem: new RenderSystem(canvas, camera)
+	world,
+	substeps: 4,
+	tDelta: 1 / 60,
+	gravity: new Vec2(0, -9.8),
+	renderSystem: new RenderSystem(canvas, camera),
 });
 
 reset();
 
 function reset() {
-	ECS.clearEntities();
+	resetWorld(world);
+	createBorder();
+	createPlinkoboard();
+	createBalls();
 
-	playingField();
-	bumpers();
-	edges();
-	pinballs();
-
+	simulation.singleStep(); // Resolve overlap from random placement
 	simulation.render();
 }
 
-// ------------------------------------------------------
+function createBalls() {
+	const scaleH = canvas.height / camera.scale;
 
-function bumpers() {
-	createBumper({
-		position: new Vec2(0.3, 0.8),
-		color: '#f00'
-	});
+	for (let i = 0; i < 500; i++) {
+		const radius = Math.random() * (.8 - .15) + .15;
+		const pX = Math.random() * (WIDTH_IN_M - radius) + radius;
+		const pY = Math.random() * (scaleH - radius) + scaleH * 0.9;
+		// const velocity = new Vec2(Math.random() * 40 - 20, Math.random() * 40 - 20);
+		const color = '#' + (Math.random().toString(16) + '000000').substring(2, 8);
 
-	createBumper({
-		position: new Vec2(0.65, 1.5),
-		color: '#0f0'
-	});
-
-	createBumper({
-		position: new Vec2(0.18, 1.45),
-		color: '#00f'
-	});
+		const ball = createBall({
+			position: new Vec2(pX, pY),
+			velocity: new Vec2(),
+			radius: radius,
+			mass: radius * 5,
+			restitution: 0.8,
+			color: color,
+		});
+		Renderable.filled[ball] = false;
+	}
 }
 
-function edges() {
-	createEdge({
-		geometry: new EdgeGeometry(new Vec2(0.5, 0.5), new Vec2(0.85, 0.95)),
-		color: '#ff0'
-	});
+function createBall(props: BallProps): number {
+	const {
+		isKinematic = false,
+		position,
+		velocity,
+		color = '#eee',
+		radius = 0.0225,
+		mass = 0.0806,
+		restitution = 0.5,
+		debug = false,
+	} = props;
 
-	createEdge({
-		geometry: new EdgeGeometry(new Vec2(0.6, 1), new Vec2(0.3, 1.25)),
-		color: '#0ff'
-	});
+	const ball = addEntity(world);
+
+	addComponent(world, Transform, ball);
+	Transform.position[ball] = position;
+
+	addComponent(world, Rigidbody, ball);
+	Rigidbody.isKinematic[ball] = isKinematic;
+	Rigidbody.velocity[ball] = velocity;
+	Rigidbody.mass[ball] = mass;
+	Rigidbody.restitution[ball] = restitution;
+
+	addComponent(world, Shape, ball);
+	Shape.geometry[ball] = new CircleGeometry(radius);
+
+	addComponent(world, Renderable, ball);
+	Renderable.color[ball] = color;
+	Renderable.debug[ball] = debug;
+
+	return ball;
 }
 
-function pinballs() {
-	createPinball({
-		position: new Vec2(0.23, 1.6),
-		velocity: new Vec2(0.5, -1.5),
-	});
 
-	createPinball({
-		position: new Vec2(0.4, 0.6),
-		velocity: new Vec2(0.5, -0.5),
-		radius: 0.04,
-		mass: 0.16,
-		color: '#aac',
-	});
+function createPlinkoboard() {
+	const points = getPlinkoPoints();
 
-	createPinball({
-		position: new Vec2(0.9, 1.6),
-		velocity: new Vec2(0, 0),
-		radius: 0.08,
-		mass: 0.48,
-		color: '#caa',
-	});
+	for (const point of points) {
+		const plink = createBall({
+			isKinematic: true,
+			position: point,
+			velocity: new Vec2(),
+			radius: .4,
+			color: 'crimson',
+		});
+		Renderable.filled[plink] = true;
+	}
 }
 
-function playingField() {
-	const offset = 0.02;
+function getPlinkoPoints(): Vec2[] {
+	const points = [] as Vec2[];
+	const bottomOffset = 5;
+	const rowHeight = 3;
+
+	// Reduce the margin on each side to bring points closer to edges
+	const edgeMargin = 0.045 * WIDTH_IN_M; // 5% of width as margin on each side
+
+	for (let i = 0; i < 4; i++) {
+		const y = rowHeight * 2 * i + bottomOffset;
+
+		// Row with 7 points - evenly spaced
+		const spacingRow7 = (WIDTH_IN_M - 2 * edgeMargin) / 6; // Divide by (points - 1)
+		for (let j = 0; j < 7; j++) {
+			const x = edgeMargin + j * spacingRow7;
+			points.push(new Vec2(x, y));
+		}
+
+		// Row with 6 points - properly offset to be centered between points in row above
+		// Each point should be halfway between two points in the row above
+		const offsetX = spacingRow7 / 2; // Half of the spacing of row with 7 points
+		for (let j = 0; j < 6; j++) {
+			const x = edgeMargin + offsetX + j * spacingRow7;
+			points.push(new Vec2(x, y + rowHeight));
+		}
+	}
+
+	return points;
+}
+function createBorder() {
 	const points = [
-		new Vec2(0.74, 0.25),
-		new Vec2(1 - offset, 0.4),
-		new Vec2(1 - offset, HEIGHT_IN_M - offset),
-		new Vec2(offset, HEIGHT_IN_M - offset),
-		new Vec2(offset, 0.4),
-		new Vec2(0.26, 0.25),
-		new Vec2(0.26, 0),
-		new Vec2(0.74, 0)
+		//new Vec2(0, 0),
+		new Vec2(0, (canvas.height / camera.scale) * 2),
+		new Vec2(0, 0),
+		new Vec2(WIDTH_IN_M, 0),
+		new Vec2(WIDTH_IN_M, (canvas.height / camera.scale) * 2),
 	];
 
-	ECS.buildEntity()
-		.with('transform', createTransform())
-		.with('rigidbody', createRigidbody({
-			mass: Infinity,
-			restitution: 1,
-			isKinematic: true
-		}))
-		.with('shape', createShape(new PathGeometry(points)))
-		.with('renderable', createRenderable({color: '#f0f'}))
-		.build();
+	const border = addEntity(world);
+
+	addComponent(world, Transform, border);
+
+	addComponent(world, Rigidbody, border);
+	Rigidbody.isKinematic[border] = true;
+	Rigidbody.mass[border] = Infinity;
+	Rigidbody.restitution[border] = 1;
+
+	addComponent(world, Shape, border);
+	Shape.geometry[border] = new PathGeometry(points);
 }
 
 const playPauseBtn = document.getElementById('play-pause-btn') as HTMLButtonElement;

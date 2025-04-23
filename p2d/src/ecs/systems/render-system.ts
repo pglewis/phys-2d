@@ -37,6 +37,7 @@ export class RenderSystem implements System {
 						color: Renderable.color[e],
 						rotation: Transform.rotation[e],
 						debug: Renderable.debug[e],
+						filled: Renderable.filled[e],
 					});
 					break;
 				}

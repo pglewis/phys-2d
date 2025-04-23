@@ -35,7 +35,7 @@ body {
 }
 
 #canvas {
-	background: white;
+	background: #eee;
 	display: block;
 	border: 1px solid #333;
 }
