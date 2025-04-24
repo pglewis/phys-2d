@@ -8,20 +8,19 @@ import {EdgeGeometry} from 'p2d/src/geometry/edge-geometry';
 import {PathGeometry} from 'p2d/src/geometry/path-geometry';
 import {PolygonGeometry} from 'p2d/src/geometry/polygon-geometry';
 import {defineQuery} from 'bitecs';
-import {AABB} from '../../geometry/geometry.js';
 
 const collisionQuery = defineQuery([Transform, Rigidbody, Shape]);
 
-interface ContactPair {
+interface CandidatePair {
 	entityA: number,
 	entityB: number
 }
 
 export class CollisionSystem implements System {
-	contactPairs!: ContactPair[];
+	candidatePairs!: CandidatePair[];
 
 	update(world: object): void {
-		this.contactPairs = [];
+		this.candidatePairs = [];
 		const entities = collisionQuery(world);
 		this.broadPhase(entities);
 		this.narrowPhase();
@@ -31,19 +30,30 @@ export class CollisionSystem implements System {
 
 		for (let i = 0; i < entities.length - 1; i++) {
 			const entityA = entities[i];
-			const boxA = Shape.geometry[entityA].getAABB(Transform.position[entityA]);
+			const geoA = Shape.geometry[entityA];
+			const posA = Transform.position[entityA];
+			const boxA = geoA.getAABB(posA);
+			const isKinematicA = Rigidbody.isKinematic[entityA];
 
 			for (let j = i + 1; j < entities.length; j++) {
 				const entityB = entities[j];
+				const isKinematicB = Rigidbody.isKinematic[entityB];
 
-				// Two static bodies aren't going to collide
-				if (Rigidbody.isKinematic[entityA] && Rigidbody.isKinematic[entityB]) {
-					continue;
+				if (isKinematicA && isKinematicB) {
+					continue; // Two static bodies aren't going to collide
 				}
-				const boxB = Shape.geometry[entityB].getAABB(Transform.position[entityB]);
 
-				if (this.aabbOverlaps(boxA, boxB)) {
-					this.contactPairs.push({entityA, entityB});
+				const geoB = Shape.geometry[entityB];
+				const posB = Transform.position[entityB];
+				const boxB = geoB.getAABB(posB);
+
+				if (
+					boxA.min.x < boxB.max.x &&
+					boxA.max.x > boxB.min.x &&
+					boxA.min.y < boxB.max.y &&
+					boxA.max.y > boxB.min.y
+				) {
+					this.candidatePairs.push({entityA, entityB});
 				}
 			}
 		}
@@ -51,14 +61,15 @@ export class CollisionSystem implements System {
 
 	private narrowPhase(): void {
 
-		for (const pair of this.contactPairs) {
-			const entityA = pair.entityA;
-			const entityB = pair.entityB;
+		for (const pair of this.candidatePairs) {
+			const {entityA, entityB} = pair;
+			const isKinematicA = Rigidbody.isKinematic[entityA];
+			const isKinematicB = Rigidbody.isKinematic[entityB];
 
-			if (!Rigidbody.isKinematic[entityA] && !Rigidbody.isKinematic[entityB]) {
+			if (!isKinematicA && !isKinematicB) {
 				// Two dynamic bodies
 				this.circleCircleCollision(entityA, entityB);
-			} else if (Rigidbody.isKinematic[entityA]) {
+			} else if (isKinematicA) {
 				// Entity A is static
 				this.handleStaticCollision(entityB, entityA);
 			} else {
@@ -68,23 +79,11 @@ export class CollisionSystem implements System {
 		}
 	}
 
-
-	private aabbOverlaps(boxA: AABB, boxB: AABB) {
-		if (
-			boxA.min.x > boxB.max.x ||
-			boxA.max.x < boxB.min.x ||
-			boxA.min.y > boxB.max.y ||
-			boxA.max.y < boxB.min.y
-		) {
-			return false; // No overlap
-		}
-
-		return true; // Overlap
-	}
-
 	private circleCircleCollision(entityA: number, entityB: number) {
 		// currently only support collisions for a pair of circles
-		if (!(Shape.geometry[entityA] instanceof CircleGeometry) || !(Shape.geometry[entityB] instanceof CircleGeometry)) {
+		const geoA = Shape.geometry[entityA];
+		const geoB = Shape.geometry[entityB];
+		if (!(geoA instanceof CircleGeometry) || !(geoB instanceof CircleGeometry)) {
 			return;
 		}
 
@@ -92,14 +91,14 @@ export class CollisionSystem implements System {
 		const centerDist = dir.length;
 
 		// Early exit if no collision
-		if (centerDist === 0 || centerDist > Shape.geometry[entityA].radius + Shape.geometry[entityB].radius) {
+		if (centerDist === 0 || centerDist > geoA.radius + geoB.radius) {
 			return;
 		}
 
 		dir.normalize();
 
 		// Position correction
-		const overlap = Shape.geometry[entityA].radius + Shape.geometry[entityB].radius - centerDist;
+		const overlap = geoA.radius + geoB.radius - centerDist;
 
 		// Velocity correction
 		const v1 = Rigidbody.velocity[entityA].dot(dir);
@@ -137,26 +136,29 @@ export class CollisionSystem implements System {
 	}
 
 	private handleStaticCollision(entityA: number, entityB: number): void {
+		const geoA = Shape.geometry[entityA];
+		const geoB = Shape.geometry[entityB];
+
 		// Only handle circle vs. static shapes for now
-		if (!(Shape.geometry[entityA] instanceof CircleGeometry)) {
+		if (!(geoA instanceof CircleGeometry)) {
 			return;
 		}
 
 		switch (true) {
-			case (Shape.geometry[entityB] instanceof CircleGeometry): {
+			case (geoB instanceof CircleGeometry): {
 				this.circleCircleCollision(entityA, entityB);
 				break;
 			}
-			case (Shape.geometry[entityB] instanceof EdgeGeometry): {
+			case (geoB instanceof EdgeGeometry): {
 				this.handleCircleLineSegmentCollision(
 					entityA,
-					{p1: Shape.geometry[entityB].p1, p2: Shape.geometry[entityB].p2}
+					{p1: geoB.p1, p2: geoB.p2}
 				);
 				break;
 			}
-			case (Shape.geometry[entityB] instanceof PathGeometry): {
-				if (Shape.geometry[entityB].verticies.length >= 2) {
-					const points = Shape.geometry[entityB].verticies;
+			case (geoB instanceof PathGeometry): {
+				if (geoB.verticies.length >= 2) {
+					const points = geoB.verticies;
 					for (let k = 0; k < points.length - 1; k++) {
 						const segment = {p1: points[k], p2: points[k + 1]};
 						this.handleCircleLineSegmentCollision(entityA, segment);
@@ -168,9 +170,9 @@ export class CollisionSystem implements System {
 				}
 				break;
 			}
-			case (Shape.geometry[entityB] instanceof PolygonGeometry): {
-				if (Shape.geometry[entityB].verticies.length >= 2) {
-					const vertices = Shape.geometry[entityB].verticies;
+			case (geoB instanceof PolygonGeometry): {
+				if (geoB.verticies.length >= 2) {
+					const vertices = geoB.verticies;
 					for (let k = 0; k < vertices.length; k++) {
 						const p1 = vertices[k];
 						const p2 = vertices[(k + 1) % vertices.length];
@@ -196,7 +198,8 @@ export class CollisionSystem implements System {
 		const overlap = circleRad - distance;
 		Transform.position[entityA].add(dir, overlap);
 
-		const normalVelocity = Rigidbody.velocity[entityA].dot(dir);
+		const velocityA = Rigidbody.velocity[entityA];
+		const normalVelocity = velocityA.dot(dir);
 		const energyTransfer = normalVelocity * Rigidbody.restitution[entityA];
 		const totalEnergyChange = normalVelocity + energyTransfer;
 

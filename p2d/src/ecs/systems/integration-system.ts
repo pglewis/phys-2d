@@ -4,17 +4,20 @@ import {defineQuery} from 'bitecs';
 import {Transform} from '../components/transform.js';
 import {Rigidbody} from '../components/rigidbody.js';
 
+const query = defineQuery([Transform, Rigidbody]);
+
 export class IntegrationSystem implements System {
 	constructor(private readonly gravity: Vec2 = new Vec2(0, -9.8)) { }
 
 	update(world: object, deltaTime: number): void {
-		const entities = defineQuery([Transform, Rigidbody])(world);
+		const entities = query(world);
 
 		for (const e of entities) {
 			if (Rigidbody.isKinematic[e]) continue;
 
-			Rigidbody.velocity[e].add(this.gravity, deltaTime);
-			Transform.position[e].add(Rigidbody.velocity[e], deltaTime);
-		};
+			const velocity = Rigidbody.velocity[e];
+			velocity.add(this.gravity, deltaTime);
+			Transform.position[e].add(velocity, deltaTime);
+		}
 	}
 }

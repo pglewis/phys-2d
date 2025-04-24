@@ -11,9 +11,11 @@ export class CircleGeometry extends Geometry {
 
 	getAABB(position: Vec2): AABB {
 		const {x, y} = position;
+		const radius = this.radius;
+
 		return {
-			min: new Vec2(x - this.radius, y - this.radius),
-			max: new Vec2(x + this.radius, y + this.radius)
+			min: new Vec2(x - radius, y - radius),
+			max: new Vec2(x + radius, y + radius)
 		};
 	}
 }
