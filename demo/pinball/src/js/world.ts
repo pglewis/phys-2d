@@ -1,4 +1,4 @@
-import {Vec2} from 'p2d';
+import {Vec2} from 'p2d/src/vec2';
 import {Ball} from './ball';
 import {Bumper} from './bumper';
 import {Flipper} from './flipper';
@@ -69,7 +69,7 @@ export class World {
 
 		t = Math.max(0.0, Math.min(1.0, (p.dot(ab) - a.dot(ab)) / t));
 
-		return a.clone().add(ab, t);
+		return a.clone().addMult(ab, t);
 	}
 
 	private handleBallBallCollision(ball1: Ball, ball2: Ball) {
@@ -84,8 +84,8 @@ export class World {
 		dir.normalize();
 
 		const corr = (ball1.radius + ball2.radius - d) / 2.0;
-		ball1.position.add(dir, -corr);
-		ball2.position.add(dir, corr);
+		ball1.position.addMult(dir, -corr);
+		ball2.position.addMult(dir, corr);
 
 		const v1 = ball1.velocity.dot(dir);
 		const v2 = ball2.velocity.dot(dir);
@@ -96,8 +96,8 @@ export class World {
 		const newV1 = (m1 * v1 + m2 * v2 - m2 * (v1 - v2) * restitution) / (m1 + m2);
 		const newV2 = (m1 * v1 + m2 * v2 - m1 * (v2 - v1) * restitution) / (m1 + m2);
 
-		ball1.velocity.add(dir, newV1 - v1);
-		ball2.velocity.add(dir, newV2 - v2);
+		ball1.velocity.addMult(dir, newV1 - v1);
+		ball2.velocity.addMult(dir, newV2 - v2);
 	}
 
 	private handleBallBumperCollision(ball: Ball, bumper: Bumper) {
@@ -111,10 +111,10 @@ export class World {
 		dir.normalize();
 
 		const corr = ball.radius + bumper.radius - d;
-		ball.position.add(dir, corr);
+		ball.position.addMult(dir, corr);
 
 		const v = ball.velocity.dot(dir);
-		ball.velocity.add(dir, bumper.pushVel - v);
+		ball.velocity.addMult(dir, bumper.pushVel - v);
 
 		this.score++;
 	}
@@ -131,11 +131,11 @@ export class World {
 		dir.normalize();
 
 		const corr = (ball.radius + flipper.radius - d);
-		ball.position.add(dir, corr);
+		ball.position.addMult(dir, corr);
 
 		// update velocitiy
 		const radius = closest.clone();
-		radius.add(dir, flipper.radius);
+		radius.addMult(dir, flipper.radius);
 		radius.subtract(flipper.position);
 		const surfaceVel = radius.perp();
 		surfaceVel.scale(flipper.currentAngularVelocity);
@@ -143,7 +143,7 @@ export class World {
 		const v = ball.velocity.dot(dir);
 		const vnew = surfaceVel.dot(dir);
 
-		ball.velocity.add(dir, vnew - v);
+		ball.velocity.addMult(dir, vnew - v);
 	}
 
 	private handleBallBorderCollision(ball: Ball, border: Vec2[]) {
@@ -187,15 +187,15 @@ export class World {
 			if (dist > ball.radius) {
 				return;
 			}
-			ball.position.add(d, ball.radius - dist);
+			ball.position.addMult(d, ball.radius - dist);
 		} else {
-			ball.position.add(d, -(dist + ball.radius));
+			ball.position.addMult(d, -(dist + ball.radius));
 		}
 
 		// update velocity
 		const v = ball.velocity.dot(d);
 		const vnew = Math.abs(v) * ball.restitution;
-		ball.velocity.add(d, vnew - v);
+		ball.velocity.addMult(d, vnew - v);
 	}
 };
 

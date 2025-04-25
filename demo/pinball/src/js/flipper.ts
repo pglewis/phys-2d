@@ -1,4 +1,4 @@
-import {Vec2} from 'p2d';
+import {Vec2} from 'p2d/src/vec2';
 
 export type FlipperProps = {
 	radius: number
@@ -77,6 +77,6 @@ export class Flipper {
 		const dir = new Vec2(Math.cos(angle), Math.sin(angle));
 		const tip = this.position.clone();
 
-		return tip.add(dir, this.length);
+		return tip.addMult(dir, this.length);
 	}
 }

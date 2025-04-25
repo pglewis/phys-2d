@@ -1,4 +1,4 @@
-import {Vec2} from 'p2d';
+import {Vec2} from 'p2d/src/vec2';
 import {Bead} from './bead';
 import {Wire} from './wire';
 

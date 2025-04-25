@@ -110,20 +110,20 @@ export class CollisionSystem implements System {
 		// body2 may be static
 		if (Rigidbody.isKinematic[entityB]) {
 			// Update the dynamic body's position
-			Transform.position[entityA].add(dir, -overlap);
+			Transform.position[entityA].addMult(dir, -overlap);
 
 			// Update the dynamic body's velocity
 			const energyTransfer = v1 * restitution;           // Energy transferred back
 			const totalEnergyChange = v1 + energyTransfer;     // Total energy change
-			Rigidbody.velocity[entityA].add(dir, -totalEnergyChange); // Negative because it's opposing motion
+			Rigidbody.velocity[entityA].addMult(dir, -totalEnergyChange); // Negative because it's opposing motion
 
 			// Static bodies don't budge, we're done here
 			return;
 		}
 
 		// Dynamic collision: move both bodies
-		posA.add(dir, -overlap / 2);
-		Transform.position[entityB].add(dir, overlap / 2);
+		posA.addMult(dir, -overlap / 2);
+		Transform.position[entityB].addMult(dir, overlap / 2);
 
 		// Dynamic collision: update both velocities
 		// m1 * v1 + m2 * v2 = m1 * v1' + m2 * v2'
@@ -132,8 +132,8 @@ export class CollisionSystem implements System {
 		const newV1 = (m1 * v1 + m2 * v2 - m2 * (v1 - v2) * restitution) / (m1 + m2);
 		const newV2 = (m1 * v1 + m2 * v2 - m1 * (v2 - v1) * restitution) / (m1 + m2);
 
-		Rigidbody.velocity[entityA].add(dir, newV1 - v1);
-		Rigidbody.velocity[entityB].add(dir, newV2 - v2);
+		Rigidbody.velocity[entityA].addMult(dir, newV1 - v1);
+		Rigidbody.velocity[entityB].addMult(dir, newV2 - v2);
 	}
 
 	private handleStaticCollision(entityA: number, entityB: number): void {
@@ -193,13 +193,13 @@ export class CollisionSystem implements System {
 		}
 
 		dir.normalize();
-		posA.add(dir, circleRad - distance);
+		posA.addMult(dir, circleRad - distance);
 
 		const velocityA = Rigidbody.velocity[entityA];
 		const normalVelocity = velocityA.dot(dir);
 		const totalEnergyChange = normalVelocity + normalVelocity * Rigidbody.restitution[entityA];
 
-		velocityA.add(dir, -totalEnergyChange);;
+		velocityA.addMult(dir, -totalEnergyChange);;
 	}
 
 	private closestPointOnSegment(p: Vec2, a: Vec2, b: Vec2) {

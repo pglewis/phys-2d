@@ -16,8 +16,8 @@ export class IntegrationSystem implements System {
 			if (Rigidbody.isKinematic[e]) continue;
 
 			const velocity = Rigidbody.velocity[e];
-			velocity.add(this.gravity, deltaTime);
-			Transform.position[e].add(velocity, deltaTime);
+			velocity.addMult(this.gravity, deltaTime);
+			Transform.position[e].addMult(velocity, deltaTime);
 		}
 	}
 }

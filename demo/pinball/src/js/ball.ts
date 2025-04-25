@@ -1,4 +1,4 @@
-import {Vec2} from 'p2d';
+import {Vec2} from 'p2d/src/vec2';
 
 export type BallProps = {
 	radius: number
@@ -31,7 +31,7 @@ export class Ball {
 		this.velocity = velocity.clone();
 	}
 	simulate(tDelta: number, gravity: Vec2) {
-		this.velocity.add(gravity, tDelta);
-		this.position.add(this.velocity, tDelta);
+		this.velocity.addMult(gravity, tDelta);
+		this.position.addMult(this.velocity, tDelta);
 	}
 }

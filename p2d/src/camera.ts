@@ -17,7 +17,7 @@ export class Camera {
 
 	transform(v: Vec2): Vec2 {
 		// Scaled by -1 because world objects move opposite the camera's movement
-		return Vec2.add(v, Vec2.scale(this.position, -1), this.scale);
+		return Vec2.add(v, Vec2.scale(this.position, -1)).scale(this.scale);
 	}
 
 	reset() {

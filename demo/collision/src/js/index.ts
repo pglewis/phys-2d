@@ -1,4 +1,6 @@
-import {Vec2, Canvas, Camera} from 'p2d';
+import {Vec2} from 'p2d/src/vec2';
+import {Canvas} from 'p2d/src/canvas';
+import {Camera} from 'p2d/src/camera';
 import {Ball} from './ball';
 
 const reset = document.getElementById('reset-button') as HTMLButtonElement;
@@ -81,8 +83,8 @@ function handleBallCollision(ball1: Ball, ball2: Ball, restitution: number) {
 	dir.normalize();
 
 	const corr = (ball1.radius + ball2.radius - d) / 2.0;
-	ball1.position.add(dir, -corr);
-	ball2.position.add(dir, corr);
+	ball1.position.addMult(dir, -corr);
+	ball2.position.addMult(dir, corr);
 
 	const v1 = ball1.velocity.dot(dir);
 	const v2 = ball2.velocity.dot(dir);
@@ -93,8 +95,8 @@ function handleBallCollision(ball1: Ball, ball2: Ball, restitution: number) {
 	const newV1 = (m1 * v1 + m2 * v2 - m2 * (v1 - v2) * restitution) / (m1 + m2);
 	const newV2 = (m1 * v1 + m2 * v2 - m1 * (v2 - v1) * restitution) / (m1 + m2);
 
-	ball1.velocity.add(dir, newV1 - v1);
-	ball2.velocity.add(dir, newV2 - v2);
+	ball1.velocity.addMult(dir, newV1 - v1);
+	ball2.velocity.addMult(dir, newV2 - v2);
 }
 
 function handleWallCollision(ball: Ball, worldSize: Vec2) {

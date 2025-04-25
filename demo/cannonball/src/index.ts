@@ -1,4 +1,6 @@
-import {Vec2, Canvas, Camera} from 'p2d';
+import {Vec2} from 'p2d/src/vec2';
+import {Canvas} from 'p2d/src/canvas';
+import {Camera} from 'p2d/src/camera';
 
 const simMinWidth = 20.0;
 const gravity = new Vec2(0, -9.8);
@@ -38,8 +40,8 @@ function draw() {
 }
 
 function simulate(tDelta: number) {
-	ball.velocity.add(gravity, tDelta);
-	ball.position.add(ball.velocity, tDelta);
+	ball.velocity.addMult(gravity, tDelta);
+	ball.position.addMult(ball.velocity, tDelta);
 
 	if (ball.position.x < 0.0) {
 		ball.position.x = 0.0;
