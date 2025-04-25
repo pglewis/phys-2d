@@ -39,9 +39,8 @@ export class CollisionSystem implements System {
 				const entityB = entities[j];
 				const isKinematicB = Rigidbody.isKinematic[entityB];
 
-				if (isKinematicA && isKinematicB) {
-					continue; // Two static bodies aren't going to collide
-				}
+				// Two static bodies aren't going to collide
+				if (isKinematicA && isKinematicB) continue;
 
 				const geoB = Shape.geometry[entityB];
 				const posB = Transform.position[entityB];
@@ -87,7 +86,9 @@ export class CollisionSystem implements System {
 			return;
 		}
 
-		const dir = Vec2.subtract(Transform.position[entityB], Transform.position[entityA]);
+		const posA = Transform.position[entityA];
+		const posB = Transform.position[entityB];
+		const dir = Vec2.subtract(posB, posA);
 		const centerDist = dir.length;
 
 		// Early exit if no collision
@@ -121,7 +122,7 @@ export class CollisionSystem implements System {
 		}
 
 		// Dynamic collision: move both bodies
-		Transform.position[entityA].add(dir, -overlap / 2);
+		posA.add(dir, -overlap / 2);
 		Transform.position[entityB].add(dir, overlap / 2);
 
 		// Dynamic collision: update both velocities
@@ -163,10 +164,6 @@ export class CollisionSystem implements System {
 						const segment = {p1: points[k], p2: points[k + 1]};
 						this.handleCircleLineSegmentCollision(entityA, segment);
 					}
-					if (points.length > 2) {
-						const lastSegment = {p1: points[points.length - 1], p2: points[0]};
-						this.handleCircleLineSegmentCollision(entityA, lastSegment);
-					}
 				}
 				break;
 			}
@@ -186,8 +183,9 @@ export class CollisionSystem implements System {
 
 	private handleCircleLineSegmentCollision(entityA: number, lineSegment: {p1: Vec2, p2: Vec2}): void {
 		const circleRad = (Shape.geometry[entityA] as CircleGeometry).radius;
-		const c = this.closestPointOnSegment(Transform.position[entityA], lineSegment.p1, lineSegment.p2);
-		const dir = Vec2.subtract(Transform.position[entityA], c);
+		const posA = Transform.position[entityA];
+		const c = this.closestPointOnSegment(posA, lineSegment.p1, lineSegment.p2);
+		const dir = Vec2.subtract(posA, c);
 		const distance = dir.length;
 
 		if (distance === 0 || distance > circleRad) {
@@ -195,15 +193,13 @@ export class CollisionSystem implements System {
 		}
 
 		dir.normalize();
-		const overlap = circleRad - distance;
-		Transform.position[entityA].add(dir, overlap);
+		posA.add(dir, circleRad - distance);
 
 		const velocityA = Rigidbody.velocity[entityA];
 		const normalVelocity = velocityA.dot(dir);
-		const energyTransfer = normalVelocity * Rigidbody.restitution[entityA];
-		const totalEnergyChange = normalVelocity + energyTransfer;
+		const totalEnergyChange = normalVelocity + normalVelocity * Rigidbody.restitution[entityA];
 
-		Rigidbody.velocity[entityA].add(dir, -totalEnergyChange);;
+		velocityA.add(dir, -totalEnergyChange);;
 	}
 
 	private closestPointOnSegment(p: Vec2, a: Vec2, b: Vec2) {
