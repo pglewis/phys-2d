@@ -3,9 +3,18 @@ export class Timer {
 	private startTime: number | null = null;
 	private endTime: number | null = null;
 	private duration: number | null = null;
+	private timeSamples = 0;
+	private timeTotal = 0;
+	private timeAvg = 0;
 
 	constructor(name: string = 'Unnamed Timer') {
 		this.name = name;
+	}
+
+	resetTimes(): void {
+		this.timeSamples = 0;
+		this.timeTotal = 0;
+		this.timeAvg = 0;
 	}
 
 	start(): void {
@@ -20,6 +29,11 @@ export class Timer {
 		}
 		this.endTime = performance.now();
 		this.duration = this.endTime - this.startTime;
+
+		this.timeSamples++;
+		this.timeTotal += this.duration;
+		this.timeAvg = this.timeTotal / this.timeSamples;
+
 		return this.duration;
 	}
 
@@ -31,5 +45,17 @@ export class Timer {
 		} else {
 			return null;
 		}
+	}
+
+	getTimeSamples(): number {
+		return this.timeSamples;
+	}
+
+	getTimeTotal(): number {
+		return this.timeTotal;
+	}
+
+	getTimeAvg(): number {
+		return this.timeAvg;
 	}
 }
