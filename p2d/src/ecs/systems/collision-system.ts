@@ -27,15 +27,16 @@ export class CollisionSystem implements System {
 	}
 
 	private broadPhase(entities: number[]): void {
+		const len = entities.length;
 
-		for (let i = 0; i < entities.length - 1; i++) {
+		for (let i = 0; i < len - 1; i++) {
 			const entityA = entities[i];
 			const geoA = Shape.geometry[entityA];
 			const posA = Transform.position[entityA];
 			const boxA = geoA.getAABB(posA);
 			const isKinematicA = Rigidbody.isKinematic[entityA];
 
-			for (let j = i + 1; j < entities.length; j++) {
+			for (let j = i + 1; j < len; j++) {
 				const entityB = entities[j];
 				const isKinematicB = Rigidbody.isKinematic[entityB];
 
