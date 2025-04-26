@@ -18,6 +18,8 @@ export class IntegrationSystem implements System {
 			const velocity = Rigidbody.velocity[e];
 			velocity.addMult(this.gravity, deltaTime);
 			Transform.position[e].addMult(velocity, deltaTime);
+
+			Transform.rotation[e] += Rigidbody.angularVelocity[e] * deltaTime;
 		}
 	}
 }
