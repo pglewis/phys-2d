@@ -4,37 +4,35 @@ export type CanvasProps = {
 	height?: number;
 };
 
-export interface Debuggable {
+export interface DebuggableShape {
+	rotation?: number;
+	color?: string | CanvasGradient | CanvasPattern;
+	strokeColor?: string | CanvasGradient | CanvasPattern;
 	debug?: boolean;
 }
 
-export interface LineProps extends Debuggable {
+export interface LineProps extends DebuggableShape {
 	p1: {x: number, y: number};
 	p2: {x: number, y: number};
 	width: number;
-	color?: string | CanvasGradient | CanvasPattern;
 };
 
-export interface RectProps extends Debuggable {
+export interface RectProps extends DebuggableShape {
 	topLeft: {x: number, y: number};
 	width: number;
 	height: number;
-	color?: string | CanvasGradient | CanvasPattern;
 	filled?: boolean;
 };
 
-export interface CircleProps extends Debuggable {
+export interface CircleProps extends DebuggableShape {
 	position: {x: number, y: number};
 	radius: number;
-	rotation?: number;
-	color?: string | CanvasGradient | CanvasPattern;
 	filled?: boolean;
 };
 
-export interface PathProps extends Debuggable {
+export interface PathProps extends DebuggableShape {
 	points: {x: number, y: number}[];
 	width?: number;
-	color?: string | CanvasGradient | CanvasPattern;
 }
 
 export class Canvas {
@@ -99,11 +97,18 @@ export class Canvas {
 			topLeft,
 			width,
 			height,
+			rotation = 0,
 			color = '#000',
+			strokeColor = color,
 			filled = true
 		} = props;
 
 		ctx.save();
+
+		// Translate the origin to the object center, rotate, reverse
+		ctx.translate(topLeft.x + width / 2, topLeft.y + height / 2);
+		ctx.rotate(rotation);
+		ctx.translate(-(topLeft.x + width / 2), -(topLeft.y + height / 2));
 
 		ctx.beginPath();
 		ctx.rect(topLeft.x, topLeft.y, width, height);
@@ -112,8 +117,10 @@ export class Canvas {
 		if (filled) {
 			ctx.fillStyle = color;
 			ctx.fill();
-		} else {
-			ctx.strokeStyle = color;
+		}
+
+		if ((strokeColor !== color) || !filled) {
+			ctx.strokeStyle = strokeColor;
 			ctx.stroke();
 		}
 
@@ -127,6 +134,7 @@ export class Canvas {
 			radius,
 			rotation = 0,
 			color = '#000',
+			strokeColor = color,
 			filled = true,
 			debug = false,
 		} = props;
@@ -140,8 +148,10 @@ export class Canvas {
 		if (filled) {
 			ctx.fillStyle = color;
 			ctx.fill();
-		} else {
-			ctx.strokeStyle = color;
+		}
+
+		if ((strokeColor !== color) || !filled) {
+			ctx.strokeStyle = strokeColor;
 			ctx.stroke();
 		}
 

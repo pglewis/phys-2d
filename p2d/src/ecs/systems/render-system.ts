@@ -9,6 +9,7 @@ import {PathGeometry} from 'p2d/src/geometry/path-geometry';
 import {EdgeGeometry} from 'p2d/src/geometry/edge-geometry';
 import {System} from 'p2d/src/ecs/systems/system';
 import {defineQuery} from 'bitecs';
+import {BoxGeometry} from '../../geometry/box-geometry.js';
 
 export class RenderSystem implements System {
 	constructor(
@@ -28,15 +29,31 @@ export class RenderSystem implements System {
 		for (const e of renderables) {
 			const geometry = Shape.geometry[e];
 			const position = Transform.position[e];
+			const scale = this.camera.scale;
 
 			switch (true) {
 				case (geometry instanceof CircleGeometry): {
 					this.canvas.drawCircle({
 						position: this.worldToCanvas(position),
-						radius: geometry.radius * this.camera.scale,
+						radius: geometry.radius * scale,
 						color: Renderable.color[e],
+						strokeColor: Renderable.strokeColor[e],
 						rotation: Transform.rotation[e],
 						debug: Renderable.debug[e],
+						filled: Renderable.filled[e],
+					});
+					break;
+				}
+				case (geometry instanceof BoxGeometry): {
+					const size = geometry.size;
+					const topLeft = Vec2.add(position, new Vec2(-size, size));
+					this.canvas.drawRect({
+						topLeft: this.worldToCanvas(topLeft),
+						height: size * scale * 2,
+						width: size * scale * 2,
+						rotation: Transform.rotation[e],
+						color: Renderable.color[e],
+						strokeColor: Renderable.strokeColor[e],
 						filled: Renderable.filled[e],
 					});
 					break;
