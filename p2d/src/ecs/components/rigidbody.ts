@@ -7,4 +7,5 @@ export const Rigidbody = {
 	mass: [] as number[],
 	centerOfMass: [] as Vec2[],
 	inertia: [] as number[],
+	atRest: [] as boolean[],
 };
