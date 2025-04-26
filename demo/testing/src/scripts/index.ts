@@ -5,11 +5,12 @@ import {Camera} from 'p2d/src/camera';
 import {CircleGeometry} from 'p2d/src/geometry/circle-geometry';
 import {PathGeometry} from 'p2d/src/geometry/path-geometry';
 import {RenderSystem} from 'p2d/src/ecs/systems/render-system';
-import {addComponent, addEntity, createWorld, resetWorld} from 'bitecs';
+import {addComponent, addEntity, createWorld, deleteWorld} from 'bitecs';
 import {Transform} from 'p2d/src/ecs/components/transform';
 import {Rigidbody} from 'p2d/src/ecs/components/rigidbody';
 import {Shape} from 'p2d/src/ecs/components/shape';
 import {Renderable} from 'p2d/src/ecs/components/renderable';
+import {Collider} from 'p2d/src/ecs/components/collider';
 
 export interface BallProps {
 	isKinematic?: boolean;
@@ -38,32 +39,39 @@ const camera = new Camera({
 	scale: canvas.width / WIDTH_IN_M,
 });
 
-const world = createWorld({
-	components: {
-		Transform: Transform,
-		Rigidbody: Rigidbody,
-		Shape: Shape,
-		Renderable: Renderable,
-	}
-});
-
-const simulation = new Simulation({
-	world,
-	substeps: 4,
-	tDelta: 1 / 60,
-	gravity: new Vec2(0, -9.8),
-	renderSystem: new RenderSystem(canvas, camera),
-});
+let world: object;
+let simulation: Simulation;
 
 reset();
 
 function reset() {
-	resetWorld(world);
+	if (world) {
+		deleteWorld(world);
+	}
+
+	world = createWorld({
+		components: {
+			Transform: Transform,
+			Rigidbody: Rigidbody,
+			Collider: Collider,
+			Shape: Shape,
+			Renderable: Renderable,
+		}
+	});
+
+	simulation = new Simulation({
+		world,
+		substeps: 4,
+		tDelta: 1 / 60,
+		gravity: new Vec2(0, -9.8),
+		renderSystem: new RenderSystem(canvas, camera),
+	});
+
 	createBorder();
 	createPlinkoboard();
 	createBalls();
 
-	simulation.singleStep(); // Resolve overlap from random placement
+	simulation.singleStep(); // Resolve overlap from random object placement
 	simulation.render();
 }
 
@@ -75,15 +83,17 @@ function createBalls() {
 		const pX = Math.random() * (WIDTH_IN_M - radius) + radius;
 		const pY = Math.random() * (scaleH - radius) + scaleH * 0.9;
 		// const velocity = new Vec2(Math.random() * 40 - 20, Math.random() * 40 - 20);
-		const color = '#' + (Math.random().toString(16) + '000000').substring(2, 8);
+		const r = Math.floor((Math.random() * 9)).toString(16);
+		const g = Math.floor((Math.random() * 9)).toString(16);
+		const b = Math.floor((Math.random() * 9)).toString(16);
 
 		const ball = createBall({
 			position: new Vec2(pX, pY),
 			velocity: new Vec2(),
 			radius: radius,
 			mass: radius * 5,
-			restitution: 0.8,
-			color: color,
+			restitution: 0.75,
+			color: `#${r}${g}${b}`,
 		});
 		Renderable.filled[ball] = false;
 	}
@@ -110,7 +120,9 @@ function createBall(props: BallProps): number {
 	Rigidbody.isKinematic[ball] = isKinematic;
 	Rigidbody.velocity[ball] = velocity;
 	Rigidbody.mass[ball] = mass;
-	Rigidbody.restitution[ball] = restitution;
+
+	addComponent(world, Collider, ball);
+	Collider.restitution[ball] = restitution;
 
 	addComponent(world, Shape, ball);
 	Shape.geometry[ball] = new CircleGeometry(radius);
@@ -132,7 +144,7 @@ function createPlinkoboard() {
 			position: point,
 			velocity: new Vec2(),
 			radius: .4,
-			color: 'crimson',
+			color: 'black',
 		});
 		Renderable.filled[plink] = true;
 	}
@@ -183,7 +195,9 @@ function createBorder() {
 	addComponent(world, Rigidbody, border);
 	Rigidbody.isKinematic[border] = true;
 	Rigidbody.mass[border] = Infinity;
-	Rigidbody.restitution[border] = 1;
+
+	addComponent(world, Collider, border);
+	Collider.restitution[border] = 1;
 
 	addComponent(world, Shape, border);
 	Shape.geometry[border] = new PathGeometry(points);

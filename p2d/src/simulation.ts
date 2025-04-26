@@ -8,8 +8,8 @@ export interface SimulationProps {
 	world: object;
 	renderSystem: RenderSystem;
 	gravity?: Vec2;
-	tDelta?: number
-	substeps?: number
+	tDelta?: number;
+	substeps?: number;
 }
 
 export class Simulation {

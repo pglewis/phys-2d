@@ -8,8 +8,9 @@ import {EdgeGeometry} from 'p2d/src/geometry/edge-geometry';
 import {PathGeometry} from 'p2d/src/geometry/path-geometry';
 import {PolygonGeometry} from 'p2d/src/geometry/polygon-geometry';
 import {defineQuery} from 'bitecs';
+import {Collider} from '../components/collider.js';
 
-const collisionQuery = defineQuery([Transform, Rigidbody, Shape]);
+const collisionQuery = defineQuery([Transform, Collider, Rigidbody, Shape]);
 
 interface CandidatePair {
 	entityA: number,
@@ -106,7 +107,7 @@ export class CollisionSystem implements System {
 		const v1 = Rigidbody.velocity[entityA].dot(dir);
 		const v2 = Rigidbody.velocity[entityB].dot(dir);
 
-		const restitution = Math.min(Rigidbody.restitution[entityA], Rigidbody.restitution[entityB]);
+		const restitution = Math.min(Collider.restitution[entityA], Collider.restitution[entityB]);
 
 		// body2 may be static
 		if (Rigidbody.isKinematic[entityB]) {
@@ -198,7 +199,7 @@ export class CollisionSystem implements System {
 
 		const velocityA = Rigidbody.velocity[entityA];
 		const normalVelocity = velocityA.dot(dir);
-		const totalEnergyChange = normalVelocity + normalVelocity * Rigidbody.restitution[entityA];
+		const totalEnergyChange = normalVelocity + normalVelocity * Collider.restitution[entityA];
 
 		velocityA.addMult(dir, -totalEnergyChange);;
 	}

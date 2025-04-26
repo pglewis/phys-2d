@@ -1,11 +1,10 @@
 import {Vec2} from 'p2d/src/vec2';
 
 export const Rigidbody = {
-	velocity: [] as Vec2[],
-	mass: [] as number[],
-	restitution: [] as number[],
 	isKinematic: [] as boolean[],
+	velocity: [] as Vec2[],
 	angularVelocity: [] as number[],
+	mass: [] as number[],
+	centerOfMass: [] as Vec2[],
 	inertia: [] as number[],
-	angularDamping: [] as number[],
 };

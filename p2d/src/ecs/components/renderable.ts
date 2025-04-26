@@ -7,4 +7,3 @@ export const Renderable = {
 	debug: [] as boolean[],
 	filled: [] as boolean[],
 };
-
