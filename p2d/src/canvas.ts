@@ -156,6 +156,21 @@ export class Canvas {
 		}
 
 		if (debug) {
+			// Create contrasting color by inverting the fill color
+			let debugStrokeColor = '#fff';  // default to white
+
+			if (typeof color === 'string' && color.startsWith('#')) {
+				// Convert hex to RGB and invert
+				const hex = color.slice(1);
+				const r = parseInt(hex.slice(0, 2), 16);
+				const g = parseInt(hex.slice(2, 4), 16);
+				const b = parseInt(hex.slice(4, 6), 16);
+				// Calculate perceived brightness using relative luminance
+				// See: https://www.w3.org/TR/WCAG20/#relativeluminancedef
+				const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+				debugStrokeColor = luminance < 0.5 ? '#ffffff' : '#000000';
+			}
+
 			// Draw the rotation line
 			ctx.beginPath();
 			ctx.moveTo(position.x, position.y);
@@ -163,7 +178,7 @@ export class Canvas {
 				position.x + radius * Math.cos(rotation),
 				position.y + radius * Math.sin(rotation)
 			);
-			ctx.strokeStyle = '#000';
+			ctx.strokeStyle = debugStrokeColor;
 			ctx.stroke();
 		}
 
