@@ -7,4 +7,7 @@ export const Renderable = {
 	offset: [] as Vec2[],
 	debug: [] as boolean[],
 	filled: [] as boolean[],
+	//--!! Debugging only
+	translatedVertices: [] as Vec2[][],
+	isColliding: [] as boolean[],
 };

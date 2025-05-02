@@ -2,7 +2,7 @@ import {Vec2} from 'p2d/src/vec2';
 import {AABB, Geometry, GeometryTypes} from './geometry.js';
 
 export class PathGeometry extends Geometry {
-	private aabb: AABB;
+	private readonly extents: Vec2;
 	verticies: Vec2[];
 
 	constructor(verticies: Vec2[]) {
@@ -24,14 +24,10 @@ export class PathGeometry extends Geometry {
 				maxY = point.y;
 			}
 		}
-
-		this.aabb = {
-			min: new Vec2(minX, minY),
-			max: new Vec2(maxX, maxY)
-		};
+		this.extents = new Vec2(maxX - minX, maxY - minY);
 	}
 
-	getAABB(): AABB {
-		return this.aabb;
+	getExtents(): Vec2 {
+		return this.extents;
 	}
 }

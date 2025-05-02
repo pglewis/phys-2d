@@ -2,6 +2,7 @@ import {Vec2} from '../vec2.js';
 
 export enum GeometryTypes {
 	circle,
+	box,
 	polygon,
 	edge,
 	path,
@@ -12,6 +13,20 @@ export interface AABB {
 	max: Vec2;
 }
 
+export function getAABB(position: Vec2, geometry: Geometry): AABB {
+	const extent = geometry.getExtents();
+	return {
+		min: new Vec2(
+			position.x - extent.x,
+			position.y - extent.y
+		),
+		max: new Vec2(
+			position.x + extent.x,
+			position.y + extent.y
+		)
+	};
+}
+
 export abstract class Geometry {
 	type: GeometryTypes;
 
@@ -19,5 +34,5 @@ export abstract class Geometry {
 		this.type = type;
 	}
 
-	abstract getAABB(position: Vec2): AABB;
+	abstract getExtents(): Vec2;
 }

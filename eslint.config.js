@@ -60,6 +60,7 @@ export default tseslint.config(
 			'jsdoc/require-returns-description': 'off',
 			'jsdoc/require-returns-type': 'off',
 			'jsdoc/require-param-type': 'off',
+			'jsdoc/tag-lines': ['error' | 'warn', 'any', {'startLines': 1}]
 		}
 	},
 );

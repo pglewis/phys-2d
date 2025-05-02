@@ -83,9 +83,9 @@ function createBalls() {
 		const pX = Math.random() * (WIDTH_IN_M - radius) + radius;
 		const pY = Math.random() * (scaleH - radius) + scaleH * 0.9;
 		// const velocity = new Vec2(Math.random() * 40 - 20, Math.random() * 40 - 20);
-		const r = Math.floor((Math.random() * 9)).toString(16);
-		const g = Math.floor((Math.random() * 9)).toString(16);
-		const b = Math.floor((Math.random() * 9)).toString(16);
+		const r = Math.floor((Math.random() * 9)).toString(16).padStart(2, '0');
+		const g = Math.floor((Math.random() * 9)).toString(16).padStart(2, '0');
+		const b = Math.floor((Math.random() * 9)).toString(16).padStart(2, '0');
 
 		const ball = createBall({
 			position: new Vec2(pX, pY),

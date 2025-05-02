@@ -1,8 +1,8 @@
 import {Vec2} from 'p2d/src/vec2';
-import {AABB, Geometry, GeometryTypes} from 'p2d/src/geometry/geometry';
+import {Geometry, GeometryTypes} from 'p2d/src/geometry/geometry';
 
 export class EdgeGeometry extends Geometry {
-	private aabb: AABB;
+	private readonly extents: Vec2;
 	p1: Vec2;
 	p2: Vec2;
 
@@ -10,20 +10,10 @@ export class EdgeGeometry extends Geometry {
 		super(GeometryTypes.edge);
 		this.p1 = p1;
 		this.p2 = p2;
-
-		this.aabb = {
-			min: new Vec2(
-				Math.min(this.p1.x, this.p2.x),
-				Math.min(this.p1.y, this.p2.y)
-			),
-			max: new Vec2(
-				Math.max(this.p1.x, this.p2.x),
-				Math.max(this.p1.y, this.p2.y)
-			)
-		};
+		this.extents = Vec2.subtract(p2, p1);
 	}
 
-	getAABB(): AABB {
-		return this.aabb;
+	getExtents(): Vec2 {
+		return this.extents;
 	}
 }

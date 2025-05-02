@@ -1,21 +1,28 @@
-import {AABB, Geometry, GeometryTypes} from 'p2d/src/geometry/geometry';
+import {Geometry, GeometryTypes} from 'p2d/src/geometry/geometry';
 import {Vec2} from '../vec2.js';
 
 export class BoxGeometry extends Geometry {
 	size: number;
+	private readonly extent: number;
+	private readonly corners: Vec2[];
 
 	constructor(size: number) {
-		super(GeometryTypes.circle);
+		super(GeometryTypes.box);
 		this.size = size;
+		this.extent = size * Math.SQRT2;
+		this.corners = [
+			new Vec2(-size, -size),
+			new Vec2(size, -size),
+			new Vec2(size, size),
+			new Vec2(-size, size)
+		];
 	}
 
-	getAABB(position: Vec2): AABB {
-		const {x, y} = position;
-		const size = this.size;
+	getExtents(): Vec2 {
+		return new Vec2(this.extent, this.extent);
+	}
 
-		return {
-			min: new Vec2(x - size, y - size),
-			max: new Vec2(x + size, y + size)
-		};
+	getCorners(): Vec2[] {
+		return this.corners;
 	}
 }
