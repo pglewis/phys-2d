@@ -1,5 +1,5 @@
 import {Vec2} from 'p2d/src/vec2';
-import {AABB, Geometry, GeometryTypes} from './geometry.js';
+import {AABB, Geometry, GeometryTypes} from 'p2d/src/geometry/geometry';
 
 export class PathGeometry extends Geometry {
 	private readonly extents: Vec2;

@@ -28,9 +28,9 @@ let camera: Camera;
 let world: object;
 let simulation: Simulation;
 
-// let blueBox: number;
-// let greenBox: number;
-// let currentBox: number;
+let blueThing: number;
+let greenThing: number;
+let currentThing: number;
 
 reset();
 
@@ -58,12 +58,13 @@ function reset() {
 		world,
 		substeps: 4,
 		tDelta: 1 / 60,
-		gravity: new Vec2(0, -9.81),
+		gravity: new Vec2(0, 0),
 		renderSystem: new RenderSystem(canvas, camera),
 	});
 
 	setupObjects();
-	//currentBox = blueBox;
+	//setupTest();
+	currentThing = blueThing;
 
 	simulation.singleStep(); // Resolve overlap from random object placement
 	simulation.render();
@@ -71,10 +72,30 @@ function reset() {
 
 function setupTest() {
 
-	blueBox = makeBox(new Vec2(20, 20), 'blue');
-	greenBox = makeBox(new Vec2(35, 35), 'green');
+	blueThing = makeCircle(new Vec2(5, 20), 'blue');
+	Rigidbody.velocity[blueThing] = new Vec2(40, 0);
+
+	greenThing = makeCircle(new Vec2(20, 20), 'green');
+
+	function makeCircle(position: Vec2, color: string): number {
+		const e = makeThing(position, color);
+
+		addComponent(world, Shape, e);
+		Shape.geometry[e] = new CircleGeometry(3);
+
+		return e;
+	}
 
 	function makeBox(position: Vec2, color: string): number {
+		const e = makeThing(position, color);
+
+		addComponent(world, Shape, e);
+		Shape.geometry[e] = new BoxGeometry(3);
+
+		return e;
+	}
+
+	function makeThing(position: Vec2, color: string): number {
 		const e = addEntity(world);
 
 		addComponent(world, Transform, e);
@@ -82,35 +103,31 @@ function setupTest() {
 		Transform.rotation[e] = 0;
 
 		addComponent(world, Collider, e);
-		Collider.restitution[e] = 0.5;
+		Collider.restitution[e] = 0.56;
 
 		addComponent(world, Rigidbody, e);
 		Rigidbody.velocity[e] = new Vec2(0, 0);
 		Rigidbody.mass[e] = 1;
 		Rigidbody.angularVelocity[e] = 0;
 
-		addComponent(world, Shape, e);
-		Shape.geometry[e] = new BoxGeometry(1.5);
-
 		addComponent(world, Renderable, e);
 		Renderable.color[e] = color;
-		Renderable.debug[e] = true;
-		Renderable.isColliding[e] = false;
+		//Renderable.debug[e] = true;
 
 		return e;
 	}
 }
 
 function setupObjects() {
-	const NUM_OBJECTS = 25;
+	const NUM_OBJECTS = 50;
 
 	for (let i = 0; i < NUM_OBJECTS; i++) {
-		const radius = Math.random() * 3 + 1.5;
+		const radius = getRandomIntInclusive(8, 30) / 10;
 		const pX = getRandomIntInclusive(radius, WIDTH_IN_M - radius);
 		const pY = getRandomIntInclusive(radius, HEIGHT_IN_M - radius);
-		// const r = getRandomIntInclusive(0, 255).toString(16).padStart(2, '0');
-		// const g = getRandomIntInclusive(0, 255).toString(16).padStart(2, '0');
-		// const b = getRandomIntInclusive(0, 255).toString(16).padStart(2, '0');
+		const r = getRandomIntInclusive(128, 255).toString(16).padStart(2, '0');
+		const g = getRandomIntInclusive(128, 255).toString(16).padStart(2, '0');
+		const b = getRandomIntInclusive(128, 255).toString(16).padStart(2, '0');
 		const e = addEntity(world);
 
 		addComponent(world, Transform, e);
@@ -118,11 +135,11 @@ function setupObjects() {
 		Transform.rotation[e] = getRandomIntInclusive(0, 180);
 
 		addComponent(world, Collider, e);
-		Collider.restitution[e] = 0.5;
+		Collider.restitution[e] = 0.65;
 
 		addComponent(world, Rigidbody, e);
-		Rigidbody.velocity[e] = new Vec2(getRandomIntInclusive(-8, 8), getRandomIntInclusive(9, 29));
-		Rigidbody.mass[e] = 1;
+		Rigidbody.velocity[e] = new Vec2(getRandomIntInclusive(-20, 20), getRandomIntInclusive(-20, 20));
+		Rigidbody.mass[e] = radius;
 		//Rigidbody.angularVelocity[e] = getRandomIntInclusive(-180, 180) * Math.PI / 180;
 		Rigidbody.angularVelocity[e] = 0;
 
@@ -134,9 +151,10 @@ function setupObjects() {
 		}
 
 		addComponent(world, Renderable, e);
-		Renderable.color[e] = 'green';
+		//Renderable.color[e] = 'green';
+		Renderable.color[e] = `#${r}${g}${b}`;
 		Renderable.strokeColor[e] = 'white';
-		Renderable.debug[e] = true;
+		//Renderable.debug[e] = true;
 	}
 }
 
@@ -176,42 +194,42 @@ window.addEventListener('keydown', (event: KeyboardEvent) => {
 
 	switch (event.key) {
 		case '1': {
-			currentBox = blueBox;
+			currentThing = blueThing;
 			update();
 			break;
 		}
 		case '2': {
-			currentBox = greenBox;
+			currentThing = greenThing;
 			update();
 			break;
 		}
 		case 'ArrowLeft': {
-			Transform.position[currentBox].addX(event.ctrlKey ? -0.05 : -1);
+			Transform.position[currentThing].addX(event.ctrlKey ? -0.05 : -1);
 			update();
 			break;
 		}
 		case 'ArrowRight': {
-			Transform.position[currentBox].addX(event.ctrlKey ? 0.05 : 1);
+			Transform.position[currentThing].addX(event.ctrlKey ? 0.05 : 1);
 			update();
 			break;
 		}
 		case 'ArrowUp': {
-			Transform.position[currentBox].addY(event.ctrlKey ? 0.05 : 1);
+			Transform.position[currentThing].addY(event.ctrlKey ? 0.05 : 1);
 			update();
 			break;
 		}
 		case 'ArrowDown': {
-			Transform.position[currentBox].addY(event.ctrlKey ? -0.05 : -1);
+			Transform.position[currentThing].addY(event.ctrlKey ? -0.05 : -1);
 			update();
 			break;
 		}
 		case '+': {
-			Transform.rotation[currentBox] += (event.ctrlKey ? .5 : 3) * Math.PI / 180;
+			Transform.rotation[currentThing] += (event.ctrlKey ? .5 : 3) * Math.PI / 180;
 			update();
 			break;
 		}
 		case '-': {
-			Transform.rotation[currentBox] -= (event.ctrlKey ? .5 : 3) * Math.PI / 180;
+			Transform.rotation[currentThing] -= (event.ctrlKey ? .5 : 3) * Math.PI / 180;
 			update();
 			break;
 		}

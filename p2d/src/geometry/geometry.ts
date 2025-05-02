@@ -1,4 +1,4 @@
-import {Vec2} from '../vec2.js';
+import {Vec2} from 'p2d/src/vec2';
 
 export enum GeometryTypes {
 	circle,

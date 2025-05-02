@@ -8,10 +8,10 @@ import {EdgeGeometry} from 'p2d/src/geometry/edge-geometry';
 import {PathGeometry} from 'p2d/src/geometry/path-geometry';
 import {PolygonGeometry} from 'p2d/src/geometry/polygon-geometry';
 import {defineQuery} from 'bitecs';
-import {Collider} from '../components/collider.js';
-import {Renderable} from '../components/renderable.js';
-import {BoxGeometry} from '../../geometry/box-geometry.js';
-import {Geometry, getAABB} from '../../geometry/geometry.js';
+import {Collider} from 'p2d/src/ecs/components/collider';
+import {Renderable} from 'p2d/src/ecs/components/renderable';
+import {BoxGeometry} from 'p2d/src/geometry/box-geometry';
+import {GeometryTypes, getAABB} from 'p2d/src/geometry/geometry';
 
 const collisionQuery = defineQuery([Transform, Collider, Rigidbody, Shape]);
 
@@ -29,8 +29,6 @@ export class CollisionSystem implements System {
 	 * @param world
 	 */
 	update(world: object): void {
-		this.candidatePairs = [];
-
 		this.broadPhase(collisionQuery(world));
 		this.narrowPhase();
 	}
@@ -41,6 +39,7 @@ export class CollisionSystem implements System {
 	 * @param entities - Array of entity IDs to check for collisions
 	 */
 	private broadPhase(entities: number[]): void {
+		this.candidatePairs = [];
 		const len = entities.length;
 
 		for (let i = 0; i < len - 1; i++) {
@@ -81,42 +80,60 @@ export class CollisionSystem implements System {
 	 * Narrow phase collision detection
 	 */
 	private narrowPhase(): void {
-
 		for (const pair of this.candidatePairs) {
-			const {entityA, entityB} = pair;
-			// const isKinematicA = Rigidbody.isKinematic[entityA];
-			// const isKinematicB = Rigidbody.isKinematic[entityB];
+			this.pairCollision(pair.entityA, pair.entityB);
+		}
+	}
 
-			switch (true) {
-				case (Shape.geometry[entityA] instanceof BoxGeometry && Shape.geometry[entityB] instanceof BoxGeometry): {
-					this.polyPolyCollision(entityA, entityB);
-					break;
-				}
-				case (Shape.geometry[entityA] instanceof BoxGeometry && Shape.geometry[entityB] instanceof CircleGeometry): {
-					this.polyCircleCollision(entityA, entityB);
-					break;
-				}
-				case (Shape.geometry[entityA] instanceof CircleGeometry && Shape.geometry[entityB] instanceof BoxGeometry): {
-					this.polyCircleCollision(entityB, entityA);
-					break;
-				}
-				case (Shape.geometry[entityA] instanceof CircleGeometry && Shape.geometry[entityB] instanceof CircleGeometry): {
-					this.circleCircleCollision(entityA, entityB);
-					break;
-				}
+	/**
+	 * Handle collision between two entities.  Detect if there is a collision, resolve it, and respond accordingly.
+	 *
+	 * @param entityA
+	 * @param entityB
+	 */
+	private pairCollision(entityA: number, entityB: number): void {
+		const geoA = Shape.geometry[entityA];
+		const geoB = Shape.geometry[entityB];
+
+		switch (true) {
+			// Box/Box
+			case (geoA.type === GeometryTypes.box && geoB.type === GeometryTypes.box): {
+				this.polyPolyCollision(entityA, entityB);
+				break;
 			}
 
-			// if (!isKinematicA && !isKinematicB) {
-			// 	// Two dynamic bodies
-			// 	this.circleCircleCollision(entityA, entityB);
-			// } else if (isKinematicA) {
-			// 	// Entity A is static
-			// 	this.handleStaticCollision(entityB, entityA);
-			// } else {
-			// 	// Entity B is static
-			// 	this.handleStaticCollision(entityA, entityB);
-			// }
+			// Box/Circle
+			case (geoA.type === GeometryTypes.box && geoB.type === GeometryTypes.circle): {
+				this.polyCircleCollision(entityA, entityB);
+				break;
+			}
+
+			// Circle/Box
+			case (geoA.type === GeometryTypes.circle && geoB.type === GeometryTypes.box): {
+				this.polyCircleCollision(entityB, entityA);
+				break;
+			}
+
+			// Circle/Circle
+			case (geoA.type === GeometryTypes.circle && geoB.type === GeometryTypes.circle): {
+				this.circleCircleCollision(entityA, entityB);
+				break;
+			}
 		}
+	}
+
+	private pairResponse(entityA: number, entityB: number, normal: Vec2): void {
+		const velocityA = Rigidbody.velocity[entityA];
+		const massA = Rigidbody.mass[entityA];
+		const velocityB = Rigidbody.velocity[entityB];
+		const massB = Rigidbody.mass[entityB];
+		const restitution = Math.min(Collider.restitution[entityA], Collider.restitution[entityB]);
+		const vRelative = Vec2.subtract(velocityB, velocityA);
+
+		const j = -(1 + restitution) * vRelative.dot(normal) / (1 / massA + 1 / massB);
+
+		velocityA.addMult(normal, -j / massA);
+		velocityB.addMult(normal, j / massB);
 	}
 
 	/**
@@ -185,14 +202,15 @@ export class CollisionSystem implements System {
 			normal.scale(-1);
 		}
 
+		// Resolve and respond
 		depth /= normal.length;
 		normal.normalize();
-
-		/** DEBUG */
-		Renderable.isColliding[entityA] = true;
-		Renderable.isColliding[entityB] = true;
 		Transform.position[entityA].addMult(normal, depth / 2);
 		Transform.position[entityB].addMult(normal, -depth / 2);
+		this.pairResponse(entityA, entityB, normal);
+
+		Renderable.isColliding[entityA] = true;
+		Renderable.isColliding[entityB] = true;
 	}
 
 	/**
@@ -240,10 +258,6 @@ export class CollisionSystem implements System {
 			}
 		}
 
-		// DEBUG
-		Renderable.isColliding[polyEntity] = true;
-		Renderable.isColliding[circleEntity] = true;
-
 		if (!closestPoint || !collisionAxis || minDist >= radius) {
 			return;
 		}
@@ -259,6 +273,10 @@ export class CollisionSystem implements System {
 
 		Transform.position[circleEntity].addMult(normal, depth / 2);
 		Transform.position[polyEntity].addMult(normal, -depth / 2);
+		this.pairResponse(polyEntity, circleEntity, normal);
+
+		Renderable.isColliding[polyEntity] = true;
+		Renderable.isColliding[circleEntity] = true;
 	}
 
 	private circleCircleCollision(entityA: number, entityB: number) {
@@ -301,23 +319,13 @@ export class CollisionSystem implements System {
 			return;
 		}
 
-		// DEBUG
-		Renderable.isColliding[entityA] = true;
-		Renderable.isColliding[entityB] = true;
-
-		// Dynamic collision: move both bodies
+		// Dynamic collision: move both bodies and respond
 		posA.addMult(dir, -overlap / 2);
 		Transform.position[entityB].addMult(dir, overlap / 2);
+		this.pairResponse(entityA, entityB, dir);
 
-		// Dynamic collision: update both velocities
-		// m1 * v1 + m2 * v2 = m1 * v1' + m2 * v2'
-		const m1 = Rigidbody.mass[entityA];
-		const m2 = Rigidbody.mass[entityB];
-		const newV1 = (m1 * v1 + m2 * v2 - m2 * (v1 - v2) * restitution) / (m1 + m2);
-		const newV2 = (m1 * v1 + m2 * v2 - m1 * (v2 - v1) * restitution) / (m1 + m2);
-
-		Rigidbody.velocity[entityA].addMult(dir, newV1 - v1);
-		Rigidbody.velocity[entityB].addMult(dir, newV2 - v2);
+		Renderable.isColliding[entityA] = true;
+		Renderable.isColliding[entityB] = true;
 	}
 
 	private getBoxVerticies(entity: number): Vec2[] {

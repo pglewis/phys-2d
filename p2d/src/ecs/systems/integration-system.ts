@@ -1,8 +1,8 @@
 import {Vec2} from 'p2d/src/vec2';
 import {System} from 'p2d/src/ecs/systems/system';
 import {defineQuery} from 'bitecs';
-import {Transform} from '../components/transform.js';
-import {Rigidbody} from '../components/rigidbody.js';
+import {Transform} from 'p2d/src/ecs/components/transform';
+import {Rigidbody} from 'p2d/src/ecs/components/rigidbody';
 
 const query = defineQuery([Transform, Rigidbody]);
 

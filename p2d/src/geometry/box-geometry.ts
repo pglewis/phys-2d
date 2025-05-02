@@ -1,5 +1,5 @@
 import {Geometry, GeometryTypes} from 'p2d/src/geometry/geometry';
-import {Vec2} from '../vec2.js';
+import {Vec2} from 'p2d/src/vec2';
 
 export class BoxGeometry extends Geometry {
 	size: number;

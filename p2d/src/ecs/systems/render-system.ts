@@ -9,9 +9,9 @@ import {PathGeometry} from 'p2d/src/geometry/path-geometry';
 import {EdgeGeometry} from 'p2d/src/geometry/edge-geometry';
 import {System} from 'p2d/src/ecs/systems/system';
 import {defineQuery} from 'bitecs';
-import {BoxGeometry} from '../../geometry/box-geometry.js';
-import {Geometry, getAABB} from '../../geometry/geometry.js';
-import {Rigidbody} from '../components/rigidbody.js';
+import {BoxGeometry} from 'p2d/src/geometry/box-geometry';
+import {Geometry, getAABB} from 'p2d/src/geometry/geometry';
+import {Rigidbody} from 'p2d/src/ecs/components/rigidbody';
 
 export class RenderSystem implements System {
 	constructor(
